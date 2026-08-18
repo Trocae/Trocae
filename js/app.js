@@ -1,6 +1,5 @@
 import { auth, isFirebaseReady } from "./firebase-init.js";
 import { onAuthStateChanged } from "firebase/auth";
-import { firebaseConfig } from "./config.js";
 import {
   signUp,
   signIn,
@@ -29,10 +28,6 @@ import {
 } from "./ui.js";
 
 const $ = (id) => document.getElementById(id);
-
-const FIREBASE_IS_CONFIGURED =
-  !firebaseConfig.apiKey.includes("AIzaSyA-p54xblpgEqdv7eJ-HjN1FvCv12Vz-ZU") &&
-  !firebaseConfig.appId.includes("1:727780957751:web:0cc36e90d867031b8069b2");
 
 let currentUser = null;
 let confirmCallback = null;
@@ -360,14 +355,6 @@ function handleAuthStateChange(user) {
   }
 }
 
-function showConfigBanner() {
-  const banner = document.createElement("div");
-  banner.style.cssText =
-    "max-width:1120px;margin:20px auto 0;padding:14px 18px;border:1px solid " +
-    "color-mix(in srgb, var(--color-warning) 40%, transparent);border-radius:12px;" +
-    "background:var(--color-warning-soft);color:var(--color-text);font-size:0.92rem;";
-  
-
 function bindEvents() {
   $("btnLogin").addEventListener("click", openAuthModal);
   $("btnHeroCta").addEventListener("click", () => {
@@ -412,10 +399,6 @@ function init() {
   initAuthTabs();
   initDropdown();
   bindEvents();
-
-  if (!FIREBASE_IS_CONFIGURED) {
-    showConfigBanner();
-  }
 
   if (!isFirebaseReady()) {
     const loading = $("feedLoading");
