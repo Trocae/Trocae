@@ -47,12 +47,12 @@ import {
 // CONFIGURAÇÃO – Substitua pelos valores reais do Firebase Console
 // ============================================================
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY_AQUI",
+  apiKey: "AIzaSyA-p54xblpgEqdv7eJ-HjN1FvCv12Vz-ZU",
   authDomain: "trocae-f94e1.firebaseapp.com",
   projectId: "trocae-f94e1",
   storageBucket: "trocae-f94e1.appspot.com",
-  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-  appId: "SEU_APP_ID"
+  messagingSenderId: "727780957751",
+  appId: "1:727780957751:web:0cc36e90d867031b8069b2"
 };
 
 // Inicialização
