@@ -3,237 +3,279 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Trocaê - Troque o que você não usa mais com a sua comunidade local.">
-  <title>Trocaê — Troque localmente</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2305986d'/%3E%3Cpath d='M20 8l3 3-8 8-3-3zM11 8l-2 2 2 2 3-3z' fill='%23fff'/%3E%3Cpath d='M9 20l3 3 8-8-3-3z' fill='%23d1fae5'/%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta name="description" content="Trocaê - Plataforma de escambo local. Troque produtos e serviços de forma sustentável.">
+  <meta name="theme-color" content="#e65100">
+  <title>Trocaê – Escambo Local</title>
   <link rel="stylesheet" href="css/styles.css">
-
-  <script type="importmap">
-    {
-      "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-        "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
-      }
-    }
-  </script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔄</text></svg>">
 </head>
 <body>
-  <a class="skip-link" href="#feed">Pular para o conteúdo</a>
-
+  <!-- Header -->
   <header class="header">
-    <div class="header-inner">
-      <a href="#" class="brand" aria-label="Trocaê — início">
-        <span class="brand-logo" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="26" height="26">
-            <rect width="32" height="32" rx="8" fill="currentColor"/>
-            <path d="M20 8l3 3-8 8-3-3zM11 8l-2 2 2 2 3-3z" fill="#fff"/>
-            <path d="M9 20l3 3 8-8-3-3z" fill="#d1fae5"/>
-          </svg>
-        </span>
-        <span class="brand-name">Trocaê</span>
+    <div class="container header-inner">
+      <a href="#" class="logo" id="logoLink" aria-label="Trocaê - Página inicial">
+        <span class="logo-icon">🔄</span>
+        <span class="logo-text">Trocaê</span>
       </a>
 
-      <nav class="header-actions">
-        <button id="btnThemeToggle" class="icon-btn" type="button" aria-label="Alternar tema">
-          <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
+      <div class="header-actions">
+        <button id="themeToggle" class="btn-icon" aria-label="Alternar tema claro/escuro" title="Tema">
+          <span class="theme-icon light">☀️</span>
+          <span class="theme-icon dark">🌙</span>
         </button>
 
-        <div id="guestArea" class="guest-area">
-          <button id="btnLogin" class="btn btn-primary btn-sm" type="button">Entrar</button>
-        </div>
+        <button id="btnNewOffer" class="btn btn-primary btn-sm hidden" aria-label="Publicar nova oferta">
+          + Publicar
+        </button>
 
-        <div id="userArea" class="user-area" hidden>
-          <button id="btnNewOffer" class="btn btn-primary btn-sm" type="button">+ Nova oferta</button>
-          <div class="user-menu">
-            <button id="btnUserMenu" class="avatar-btn" type="button" aria-label="Menu do usuário" aria-expanded="false">
-              <span id="userAvatar" class="avatar">U</span>
-              <span id="userName" class="user-name"></span>
-            </button>
-            <div id="userDropdown" class="dropdown" hidden>
-              <button id="btnProfile" class="dropdown-item" type="button">
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z" fill="currentColor"/></svg>
-                Meu perfil
-              </button>
-              <button id="btnLogout" class="dropdown-item" type="button">
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M10 17l-5-5 5-5M15 12H5M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                Sair
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+        <button id="btnAuth" class="btn btn-outline btn-sm">Entrar</button>
+
+        <button id="btnProfile" class="btn-icon hidden" aria-label="Meu perfil" title="Perfil">
+          <span class="avatar-placeholder">👤</span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main>
-    <section class="hero">
-      <div class="hero-inner">
-        <h1 class="hero-title">Troque o que você não usa mais.</h1>
-        <p class="hero-subtitle">No <strong>Trocaê</strong>, você anuncia itens que não precisa mais e troca com pessoas da sua comunidade. Sem dinheiro, sem desperdício.</p>
-        <div class="hero-actions">
-          <button id="btnHeroCta" class="btn btn-primary btn-lg" type="button">Começar a trocar</button>
-          <a class="btn btn-outline btn-lg" href="#feed">Ver ofertas</a>
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Hero / Banner Carousel -->
+    <section class="banner-section" id="bannerSection">
+      <div class="carousel" id="bannerCarousel">
+        <div class="carousel-track" id="carouselTrack">
+          <!-- Slides gerados via JS -->
         </div>
+        <button class="carousel-btn prev" id="carouselPrev" aria-label="Anterior">‹</button>
+        <button class="carousel-btn next" id="carouselNext" aria-label="Próximo">›</button>
+        <div class="carousel-dots" id="carouselDots"></div>
       </div>
     </section>
 
-    <section id="feed" class="feed">
+    <!-- Search -->
+    <section class="search-section container">
+      <div class="search-bar">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="searchInput" placeholder="Buscar por título ou descrição..." autocomplete="off" aria-label="Buscar ofertas">
+        <button id="clearSearch" class="btn-clear hidden" aria-label="Limpar busca">✕</button>
+      </div>
+    </section>
+
+    <!-- Feed de Ofertas -->
+    <section class="feed-section container">
       <div class="feed-header">
-        <div>
-          <h2 class="section-title">Ofertas recentes</h2>
-          <p class="section-subtitle">Anúncios da comunidade</p>
-        </div>
-        <button id="btnNewOfferFeed" class="btn btn-primary" type="button" hidden>+ Criar oferta</button>
+        <h2 class="section-title">Ofertas recentes</h2>
+        <span id="offerCount" class="offer-count"></span>
       </div>
 
-      <div id="feedLoading" class="feed-loading">
-        <span class="spinner" aria-hidden="true"></span>
+      <div id="offersGrid" class="offers-grid">
+        <!-- Cards gerados via JS -->
+      </div>
+
+      <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">🔍</div>
+        <h3>Nenhuma oferta encontrada</h3>
+        <p>Tente outro termo ou publique a primeira oferta da comunidade!</p>
+      </div>
+
+      <div id="loadingState" class="loading-state">
+        <div class="spinner"></div>
         <p>Carregando ofertas...</p>
       </div>
-
-      <div id="feedEmpty" class="feed-empty" hidden>
-        <svg viewBox="0 0 24 24" width="48" height="48" aria-hidden="true"><path d="M4 7h16M4 7l2-3h12l2 3M4 7v13a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7M9 11h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <h3>Ainda não há ofertas por aqui</h3>
-        <p>Seja a primeira pessoa da comunidade a anunciar uma troca.</p>
-      </div>
-
-      <div id="offersGrid" class="offers-grid"></div>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
-    <p>Trocaê — trocas locais para uma comunidade mais sustentável.</p>
-    <p class="footer-muted">Feito com <span aria-hidden="true">&lt;/&gt;</span> e boas trocas.</p>
+    <div class="container">
+      <p>© 2026 Trocaê – Economia circular e trocas sustentáveis</p>
+      <p class="footer-note">Troque o que você não usa pelo que precisa.</p>
+    </div>
   </footer>
 
-  <div id="authModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
-    <div class="modal-overlay" data-close-modal></div>
-    <div class="modal-card">
-      <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
-      <h2 id="authModalTitle" class="modal-title">Bem-vindo ao Trocaê</h2>
+  <!-- ========== MODAIS ========== -->
 
-      <div class="auth-tabs" role="tablist">
-        <button id="tabLogin" class="tab-btn is-active" type="button" role="tab" aria-selected="true">Entrar</button>
-        <button id="tabSignup" class="tab-btn" type="button" role="tab" aria-selected="false">Criar conta</button>
+  <!-- Modal Auth (Login / Cadastro) -->
+  <div id="authModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="modal-content auth-modal">
+      <button class="modal-close" data-close="authModal" aria-label="Fechar">×</button>
+      <h2 id="authTitle">Entrar no Trocaê</h2>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Entrar</button>
+        <button class="auth-tab" data-tab="signup">Criar conta</button>
       </div>
 
-      <form id="loginForm" novalidate>
+      <!-- Login Form -->
+      <form id="loginForm" class="auth-form">
         <div class="form-group">
           <label for="loginEmail">E-mail</label>
-          <input id="loginEmail" name="loginEmail" type="email" autocomplete="email" required>
+          <input type="email" id="loginEmail" required placeholder="seu@email.com" autocomplete="email">
         </div>
         <div class="form-group">
           <label for="loginPassword">Senha</label>
-          <input id="loginPassword" name="loginPassword" type="password" autocomplete="current-password" required>
+          <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password" minlength="6">
         </div>
-        <p class="form-error" id="loginError" role="alert"></p>
         <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+        <p class="auth-error" id="loginError"></p>
       </form>
 
-      <form id="signupForm" novalidate hidden>
+      <!-- Signup Form -->
+      <form id="signupForm" class="auth-form hidden">
         <div class="form-group">
           <label for="signupName">Nome de exibição</label>
-          <input id="signupName" name="signupName" type="text" autocomplete="name" maxlength="40" required>
+          <input type="text" id="signupName" required placeholder="Como quer ser chamado" maxlength="40" autocomplete="name">
         </div>
         <div class="form-group">
           <label for="signupEmail">E-mail</label>
-          <input id="signupEmail" name="signupEmail" type="email" autocomplete="email" required>
+          <input type="email" id="signupEmail" required placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="signupWhatsapp">WhatsApp (com DDD)</label>
+          <input type="tel" id="signupWhatsapp" required placeholder="11999999999" pattern="[0-9]{10,11}" maxlength="11" inputmode="numeric">
+          <small>Apenas números, com DDD (ex: 11987654321)</small>
         </div>
         <div class="form-group">
           <label for="signupPassword">Senha</label>
-          <input id="signupPassword" name="signupPassword" type="password" autocomplete="new-password" minlength="6" required>
+          <input type="password" id="signupPassword" required placeholder="Mínimo 6 caracteres" minlength="6" autocomplete="new-password">
         </div>
-        <div class="form-group">
-          <label for="signupConfirm">Confirmar senha</label>
-          <input id="signupConfirm" name="signupConfirm" type="password" autocomplete="new-password" minlength="6" required>
-        </div>
-        <p class="form-error" id="signupError" role="alert"></p>
         <button type="submit" class="btn btn-primary btn-block">Criar conta</button>
+        <p class="auth-error" id="signupError"></p>
       </form>
     </div>
   </div>
 
-  <div id="offerModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="offerModalTitle">
-    <div class="modal-overlay" data-close-modal></div>
-    <div class="modal-card">
-      <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
-      <h2 id="offerModalTitle" class="modal-title">Nova oferta de troca</h2>
-      <p class="modal-subtitle">Descreva o item que você quer trocar.</p>
-      <form id="offerForm" novalidate>
+  <!-- Modal Nova Oferta / Editar -->
+  <div id="offerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="offerModalTitle">
+    <div class="modal-content offer-modal">
+      <button class="modal-close" data-close="offerModal" aria-label="Fechar">×</button>
+      <h2 id="offerModalTitle">Publicar oferta</h2>
+
+      <form id="offerForm">
+        <input type="hidden" id="offerId">
         <div class="form-group">
-          <label for="offerTitle">Título</label>
-          <input id="offerTitle" name="offerTitle" type="text" maxlength="80" placeholder="Ex.: Bicicleta aro 26 em bom estado" required>
+          <label for="offerTitle">Título *</label>
+          <input type="text" id="offerTitle" required maxlength="80" placeholder="Ex: Bicicleta usada por ferramentas">
         </div>
         <div class="form-group">
-          <label for="offerDescription">Descrição</label>
-          <textarea id="offerDescription" name="offerDescription" rows="4" maxlength="500" placeholder="Descreva o item, seu estado de conservação e o que você gostaria em troca." required></textarea>
+          <label for="offerDescription">Descrição *</label>
+          <textarea id="offerDescription" required rows="4" maxlength="1000" placeholder="Descreva o que você oferece e o que procura em troca..."></textarea>
         </div>
-        <p class="form-error" id="offerError" role="alert"></p>
-        <button type="submit" class="btn btn-primary btn-block">Publicar oferta</button>
+        <div class="form-group">
+          <label>Fotos (até 6) *</label>
+          <div class="image-upload-area" id="imageUploadArea">
+            <input type="file" id="offerImages" accept="image/*" multiple hidden>
+            <button type="button" class="btn btn-outline btn-sm" id="btnSelectImages">Selecionar imagens</button>
+            <p class="hint">Máximo 6 fotos. A primeira será a capa.</p>
+          </div>
+          <div id="imagePreview" class="image-preview-grid"></div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="offerModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitOffer">Publicar</button>
+        </div>
+        <p class="auth-error" id="offerError"></p>
       </form>
     </div>
   </div>
 
-  <div id="profileModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
-    <div class="modal-overlay" data-close-modal></div>
-    <div class="modal-card">
-      <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
-      <h2 id="profileModalTitle" class="modal-title">Meu perfil</h2>
-
-      <div id="verificationBanner" class="verification-banner" hidden>
-        <p id="verificationText"></p>
-        <button id="btnResendVerification" class="btn btn-outline btn-sm" type="button">Reenviar e-mail de verificação</button>
-      </div>
-
-      <form id="profileForm" novalidate>
-        <div class="form-group">
-          <label for="profileName">Nome de exibição</label>
-          <input id="profileName" name="profileName" type="text" maxlength="40" required>
-        </div>
-        <div class="form-group">
-          <label for="profileEmail">E-mail</label>
-          <input id="profileEmail" name="profileEmail" type="email" required>
-        </div>
-        <p class="form-error" id="profileError" role="alert"></p>
-        <button type="submit" class="btn btn-primary btn-block">Salvar alterações</button>
-      </form>
-
-      <hr class="divider">
-
-      <button id="btnDeleteAccount" class="btn btn-danger btn-block" type="button">Excluir minha conta</button>
-    </div>
-  </div>
-
-  <div id="confirmModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-    <div class="modal-overlay" data-close-modal></div>
-    <div class="modal-card modal-card-sm">
-      <h2 id="confirmTitle" class="modal-title"></h2>
-      <p id="confirmMessage" class="modal-message"></p>
-      <div class="modal-actions">
-        <button id="btnConfirmCancel" class="btn btn-secondary" type="button">Cancelar</button>
-        <button id="btnConfirmOk" class="btn btn-danger" type="button"></button>
+  <!-- Modal Detalhe da Oferta -->
+  <div id="detailModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-content detail-modal">
+      <button class="modal-close" data-close="detailModal" aria-label="Fechar">×</button>
+      <div id="detailContent">
+        <!-- Preenchido via JS -->
       </div>
     </div>
   </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <!-- Modal Chat -->
+  <div id="chatModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+    <div class="modal-content chat-modal">
+      <button class="modal-close" data-close="chatModal" aria-label="Fechar">×</button>
+      <div class="chat-header">
+        <h2 id="chatTitle">Conversa</h2>
+        <p id="chatOfferRef" class="chat-offer-ref"></p>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <form id="chatForm" class="chat-form">
+        <input type="text" id="chatInput" placeholder="Digite sua mensagem..." autocomplete="off" required>
+        <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
+      </form>
+    </div>
+  </div>
 
-  <script type="module" src="js/app.js"></script>
+  <!-- Modal Perfil -->
+  <div id="profileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+    <div class="modal-content profile-modal">
+      <button class="modal-close" data-close="profileModal" aria-label="Fechar">×</button>
+      <h2 id="profileTitle">Meu Perfil</h2>
+
+      <nav class="profile-tabs" role="tablist">
+        <button class="profile-tab active" data-tab="account" role="tab">⚙️ Conta</button>
+        <button class="profile-tab" data-tab="myOffers" role="tab">📢 Publicações</button>
+        <button class="profile-tab" data-tab="chats" role="tab">💬 Conversas</button>
+        <button class="profile-tab" data-tab="favorites" role="tab">⭐ Favoritos</button>
+        <button class="profile-tab" data-tab="blocked" role="tab">🚫 Bloqueados</button>
+      </nav>
+
+      <div class="profile-panels">
+        <!-- Aba 1: Conta -->
+        <div id="tab-account" class="profile-panel active" role="tabpanel">
+          <form id="profileForm">
+            <div class="form-group">
+              <label for="profileName">Nome</label>
+              <input type="text" id="profileName" required maxlength="40">
+            </div>
+            <div class="form-group">
+              <label for="profileEmail">E-mail</label>
+              <input type="email" id="profileEmail" disabled>
+              <small>O e-mail não pode ser alterado.</small>
+            </div>
+            <div class="form-group">
+              <label for="profileWhatsapp">WhatsApp (com DDD)</label>
+              <input type="tel" id="profileWhatsapp" required pattern="[0-9]{10,11}" maxlength="11">
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar alterações</button>
+          </form>
+          <hr>
+          <div class="danger-zone">
+            <h3>Zona de perigo</h3>
+            <p>Excluir permanentemente sua conta e todos os anúncios.</p>
+            <button type="button" id="btnDeleteAccount" class="btn btn-danger">Excluir conta definitivamente</button>
+          </div>
+        </div>
+
+        <!-- Aba 2: Minhas Publicações -->
+        <div id="tab-myOffers" class="profile-panel" role="tabpanel">
+          <div id="myOffersList" class="profile-list"></div>
+          <div id="myOffersEmpty" class="empty-mini hidden">Você ainda não publicou nenhuma oferta.</div>
+        </div>
+
+        <!-- Aba 3: Conversas -->
+        <div id="tab-chats" class="profile-panel" role="tabpanel">
+          <div id="chatsList" class="profile-list"></div>
+          <div id="chatsEmpty" class="empty-mini hidden">Nenhuma conversa ainda.</div>
+        </div>
+
+        <!-- Aba 4: Favoritos -->
+        <div id="tab-favorites" class="profile-panel" role="tabpanel">
+          <div id="favoritesList" class="profile-list"></div>
+          <div id="favoritesEmpty" class="empty-mini hidden">Nenhum favorito salvo.</div>
+        </div>
+
+        <!-- Aba 5: Bloqueados -->
+        <div id="tab-blocked" class="profile-panel" role="tabpanel">
+          <div id="blockedList" class="profile-list"></div>
+          <div id="blockedEmpty" class="empty-mini hidden">Nenhum usuário bloqueado.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
