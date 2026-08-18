@@ -1,3 +1,4 @@
+//1
 let toastTimer = null;
 
 export function toast(message, type = "info", duration = 3500) {
