@@ -1,1968 +1,239 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trocaê | Plataforma de Escambo 100% Direto</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Trocaê - Troque o que você não usa mais com a sua comunidade local.">
+  <title>Trocaê — Troque localmente</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2305986d'/%3E%3Cpath d='M20 8l3 3-8 8-3-3zM11 8l-2 2 2 2 3-3z' fill='%23fff'/%3E%3Cpath d='M9 20l3 3 8-8-3-3z' fill='%23d1fae5'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
 
-  <style>
-    :root {
-      --primary-blue: #0088ff;
-      --primary-red: #ff3355;
-      --bg-gradient: linear-gradient(135deg, #0088ff 0%, #7052ff 50%, #ff3355 100%);
-      --dark-card: #121824;
-      --dark-bg: #0b0f17;
-      --text-main: #f0f4f8;
-      --text-muted: #94a3b8;
-      --border-color: rgba(255, 255, 255, 0.1);
-      --whatsapp-green: #25d366;
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+      }
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    body {
-      background-color: var(--dark-bg);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      background: rgba(11, 15, 23, 0.85);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border-color);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 1rem 2rem;
-    }
-
-    .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo-container {
-      position: relative;
-      display: inline-block;
-      padding: 10px 15px;
-      text-decoration: none;
-    }
-
-    .logo-text {
-      font-size: 2rem;
-      font-weight: 900;
-      color: #ffffff;
-      letter-spacing: -0.5px;
-    }
-
-    .arrow-top {
-      position: absolute;
-      top: -2px;
-      left: 10px; right: 10px;
-      height: 12px;
-      border-top: 3px solid var(--primary-blue);
-      border-right: 3px solid var(--primary-blue);
-      border-top-right-radius: 12px;
-      transform: skewX(-15deg);
-    }
-    .arrow-top::after {
-      content: '';
-      position: absolute;
-      right: -2px; top: -6px;
-      border-left: 6px solid transparent;
-      border-bottom: 6px solid transparent;
-      border-top: 6px solid var(--primary-blue);
-      transform: rotate(-45deg);
-    }
-
-    .arrow-bottom {
-      position: absolute;
-      bottom: -2px;
-      left: 10px; right: 10px;
-      height: 12px;
-      border-bottom: 3px solid var(--primary-red);
-      border-left: 3px solid var(--primary-red);
-      border-bottom-left-radius: 12px;
-      transform: skewX(-15deg);
-    }
-    .arrow-bottom::after {
-      content: '';
-      position: absolute;
-      left: -2px; bottom: -6px;
-      border-right: 6px solid transparent;
-      border-top: 6px solid transparent;
-      border-bottom: 6px solid var(--primary-red);
-      transform: rotate(-45deg);
-    }
-
-    .nav-actions {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .btn {
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s, opacity 0.2s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    .btn-gradient { background: var(--bg-gradient); color: #fff; }
-    .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
-    .btn-whatsapp {
-      background: var(--whatsapp-green);
-      color: #fff;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    .hero {
-      background: var(--bg-gradient);
-      padding: 4rem 2rem 5rem 2rem;
-      text-align: center;
-    }
-
-    .hero h1 { font-size: 2.8rem; margin-bottom: 1rem; }
-    .hero p { font-size: 1.2rem; opacity: 0.95; }
-
-    .search-bar {
-      max-width: 900px;
-      margin: -2.8rem auto 2.5rem auto;
-      background: var(--dark-card);
-      padding: 1.2rem;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      display: flex; gap: 0.8rem; flex-wrap: wrap;
-      position: relative; z-index: 10;
-    }
-
-    .search-input, .category-select, .form-input, .form-textarea {
-      flex: 1; min-width: 180px; padding: 0.8rem;
-      background: var(--dark-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 6px; color: var(--text-main);
-      outline: none;
-    }
-
-    .form-input, .form-textarea { width: 100%; margin-bottom: 1rem; }
-    .form-textarea { resize: vertical; min-height: 80px; }
-
-    .container {
-      max-width: 1200px; margin: 0 auto;
-      padding: 1rem 2rem 2rem 2rem; width: 100%; flex: 1;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .card {
-      background: var(--dark-card);
-      border: 1px solid var(--border-color);
-      border-radius: 12px; overflow: hidden;
-      display: flex; flex-direction: column;
-      transition: transform 0.2s;
-      position: relative;
-    }
-
-    .card:hover { transform: translateY(-4px); border-color: var(--primary-blue); }
-
-    .btn-fav {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 15;
-      background: rgba(11, 15, 23, 0.75);
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 1.2rem;
-      transition: transform 0.2s, background-color 0.2s;
-    }
-
-    .btn-fav:hover {
-      transform: scale(1.15);
-      background: rgba(11, 15, 23, 0.95);
-    }
-
-    .card-gallery-preview {
-      position: relative;
-      height: 220px;
-      background: #1e293b;
-      cursor: pointer;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .no-image-placeholder {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .gallery-badge {
-      position: absolute;
-      bottom: 8px; right: 8px;
-      background: rgba(0,0,0,0.75);
-      color: #fff;
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .card-body { padding: 1.2rem; display: flex; flex-direction: column; flex: 1; }
-
-    .card-badge {
-      align-self: flex-start; padding: 0.2rem 0.6rem;
-      border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem;
-    }
-    .badge-servico { background: rgba(255, 51, 85, 0.2); color: var(--primary-red); }
-    .badge-produto { background: rgba(0, 136, 255, 0.2); color: var(--primary-blue); }
-
-    .card-title { font-size: 1.2rem; margin-bottom: 0.5rem; padding-right: 1.5rem; }
-
-    .description-container {
-      margin-bottom: 0.8rem;
-      word-break: break-word;
-    }
-    .card-desc-text {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      line-height: 1.4;
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-wrap: break-word;
-    }
-
-    .card-desc-text.collapsed {
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .btn-toggle-desc {
-      background: none;
-      border: none;
-      color: var(--primary-blue);
-      font-size: 0.8rem;
-      cursor: pointer;
-      font-weight: bold;
-      margin-top: 0.3rem;
-      padding: 0;
-      display: none;
-    }
-
-    .card-wants {
-      font-size: 0.85rem; color: var(--text-main);
-      background: rgba(255, 255, 255, 0.03);
-      padding: 0.6rem; border-radius: 6px;
-      border: 1px dashed var(--border-color);
-      margin-bottom: 1rem; margin-top: auto;
-      word-break: break-word;
-    }
-
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 0.8rem;
-      border-top: 1px solid var(--border-color);
-      font-size: 0.85rem;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .user-info { display: flex; flex-direction: column; }
-    .user-location { font-size: 0.75rem; color: var(--text-muted); }
-
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
-      display: none; justify-content: center; align-items: center;
-      z-index: 1000; padding: 1rem;
-    }
-
-    .modal-card {
-      background: var(--dark-card); border: 1px solid var(--border-color);
-      border-radius: 16px; width: 100%; max-width: 550px; padding: 2rem;
-      position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-      max-height: 90vh; overflow-y: auto;
-    }
-
-    .modal-close {
-      position: absolute; top: 1rem; right: 1rem;
-      background: transparent; border: none; color: var(--text-muted);
-      font-size: 1.5rem; cursor: pointer;
-    }
-
-    .modal-title { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
-
-    .profile-tabs {
-      display: flex; border-bottom: 1px solid var(--border-color);
-      margin-bottom: 1.2rem;
-      overflow-x: auto;
-    }
-    .tab-btn {
-      flex: 1; padding: 0.8rem 0.5rem; background: none; border: none;
-      color: var(--text-muted); font-weight: bold; cursor: pointer;
-      border-bottom: 2px solid transparent;
-      font-size: 0.8rem;
-      white-space: nowrap;
-    }
-    .tab-btn.active {
-      color: var(--primary-blue); border-bottom-color: var(--primary-blue);
-    }
-
-    .badge-unread {
-      background: var(--primary-red);
-      color: #fff;
-      font-size: 0.7rem;
-      padding: 0.1rem 0.4rem;
-      border-radius: 10px;
-      margin-left: 0.3rem;
-      font-weight: bold;
-    }
-
-    .gallery-viewer-modal {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.95); z-index: 2500;
-      display: none; flex-direction: column;
-      justify-content: center; align-items: center;
-    }
-    .gallery-img-container {
-      position: relative; width: 90vw; max-width: 800px; height: 70vh;
-      display: flex; justify-content: center; align-items: center;
-    }
-    .gallery-img-full {
-      max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px;
-    }
-    .gallery-nav-btn {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      background: rgba(255,255,255,0.2); color: #fff;
-      border: none; padding: 1rem; cursor: pointer;
-      font-size: 1.5rem; border-radius: 50%; user-select: none; z-index: 10;
-    }
-    .gallery-nav-btn:hover { background: rgba(255,255,255,0.4); }
-    .gallery-prev { left: 1rem; }
-    .gallery-next { right: 1rem; }
-
-    .my-ad-item, .chat-item, .fav-item, .blocked-item {
-      background: var(--dark-bg); border: 1px solid var(--border-color);
-      border-radius: 8px; padding: 0.8rem; margin-bottom: 0.8rem;
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 0.5rem;
-    }
-    .my-ad-item:hover, .chat-item:hover, .fav-item:hover, .blocked-item:hover { border-color: var(--primary-blue); }
-
-    .chat-header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.8rem;
-      margin-bottom: 1rem;
-    }
-
-    .chat-messages-container {
-      height: 320px;
-      overflow-y: auto;
-      background: var(--dark-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    .chat-bubble {
-      max-width: 80%;
-      padding: 0.6rem 0.9rem;
-      border-radius: 12px;
-      font-size: 0.88rem;
-      line-height: 1.3;
-      word-break: break-word;
-    }
-
-    .chat-bubble.mine {
-      align-self: flex-end;
-      background: var(--primary-blue);
-      color: #fff;
-      border-bottom-right-radius: 2px;
-    }
-
-    .chat-bubble.other {
-      align-self: flex-start;
-      background: #1e293b;
-      color: var(--text-main);
-      border-bottom-left-radius: 2px;
-      border: 1px solid var(--border-color);
-    }
-
-    .chat-bubble-time {
-      font-size: 0.65rem;
-      opacity: 0.7;
-      margin-top: 0.3rem;
-      text-align: right;
-    }
-
-    .chat-input-row {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    footer {
-      background: var(--dark-card); border-top: 1px solid var(--border-color);
-      text-align: center; padding: 2rem; color: var(--text-muted);
-      font-size: 0.9rem; margin-top: auto;
-    }
-
-    .auth-only { display: none; }
-
-    .notice-box {
-      background: rgba(0, 136, 255, 0.1);
-      border: 1px solid var(--primary-blue);
-      border-radius: 8px;
-      padding: 0.8rem;
-      margin-bottom: 1rem;
-      font-size: 0.85rem;
-      color: var(--text-main);
-    }
-  </style>
+  </script>
 </head>
 <body>
+  <a class="skip-link" href="#feed">Pular para o conteúdo</a>
 
-  <header>
-    <div class="nav-container">
-      <a href="#" class="logo-container">
-        <div class="arrow-top"></div>
-        <span class="logo-text">Trocaê</span>
-        <div class="arrow-bottom"></div>
+  <header class="header">
+    <div class="header-inner">
+      <a href="#" class="brand" aria-label="Trocaê — início">
+        <span class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="26" height="26">
+            <rect width="32" height="32" rx="8" fill="currentColor"/>
+            <path d="M20 8l3 3-8 8-3-3zM11 8l-2 2 2 2 3-3z" fill="#fff"/>
+            <path d="M9 20l3 3 8-8-3-3z" fill="#d1fae5"/>
+          </svg>
+        </span>
+        <span class="brand-name">Trocaê</span>
       </a>
 
-      <div class="nav-actions">
-        <button id="btnNewAd" class="btn btn-gradient auth-only">+ Anunciar Troca</button>
-        <button id="btnAuthModal" class="btn btn-outline">Carregando...</button>
-      </div>
+      <nav class="header-actions">
+        <button id="btnThemeToggle" class="icon-btn" type="button" aria-label="Alternar tema">
+          <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <div id="guestArea" class="guest-area">
+          <button id="btnLogin" class="btn btn-primary btn-sm" type="button">Entrar</button>
+        </div>
+
+        <div id="userArea" class="user-area" hidden>
+          <button id="btnNewOffer" class="btn btn-primary btn-sm" type="button">+ Nova oferta</button>
+          <div class="user-menu">
+            <button id="btnUserMenu" class="avatar-btn" type="button" aria-label="Menu do usuário" aria-expanded="false">
+              <span id="userAvatar" class="avatar">U</span>
+              <span id="userName" class="user-name"></span>
+            </button>
+            <div id="userDropdown" class="dropdown" hidden>
+              <button id="btnProfile" class="dropdown-item" type="button">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z" fill="currentColor"/></svg>
+                Meu perfil
+              </button>
+              <button id="btnLogout" class="dropdown-item" type="button">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M10 17l-5-5 5-5M15 12H5M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Sair
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
     </div>
   </header>
 
-  <section class="hero">
-    <div class="hero-content">
-      <h1>Troque o que tem pelo que precisa</h1>
-      <p>Serviços por serviços, produtos por produtos ou trocas mistas. Sem dinheiro envolvido!</p>
-    </div>
-  </section>
+  <main>
+    <section class="hero">
+      <div class="hero-inner">
+        <h1 class="hero-title">Troque o que você não usa mais.</h1>
+        <p class="hero-subtitle">No <strong>Trocaê</strong>, você anuncia itens que não precisa mais e troca com pessoas da sua comunidade. Sem dinheiro, sem desperdício.</p>
+        <div class="hero-actions">
+          <button id="btnHeroCta" class="btn btn-primary btn-lg" type="button">Começar a trocar</button>
+          <a class="btn btn-outline btn-lg" href="#feed">Ver ofertas</a>
+        </div>
+      </div>
+    </section>
 
-  <div class="search-bar">
-    <input type="text" id="searchInput" class="search-input" placeholder="O que você oferece ou procura?" />
-    <select id="categoryFilter" class="category-select">
-      <option value="">Todas as Categorias</option>
-      <option value="tecnologia">Tecnologia</option>
-      <option value="construcao">Construção & Reformas</option>
-      <option value="aulas">Aulas & Treinamentos</option>
-      <option value="beleza">Beleza & Estética</option>
-      <option value="automoveis">Automóveis</option>
-      <option value="roupas">Roupas & Acessórios</option>
-      <option value="esportes">Esportes & Lazer</option>
-    </select>
-    <select id="typeFilter" class="category-select">
-      <option value="">Todos os Tipos</option>
-      <option value="produto">Produtos</option>
-      <option value="servico">Serviços</option>
-    </select>
-    <button id="btnSearch" class="btn btn-gradient">Buscar</button>
-  </div>
+    <section id="feed" class="feed">
+      <div class="feed-header">
+        <div>
+          <h2 class="section-title">Ofertas recentes</h2>
+          <p class="section-subtitle">Anúncios da comunidade</p>
+        </div>
+        <button id="btnNewOfferFeed" class="btn btn-primary" type="button" hidden>+ Criar oferta</button>
+      </div>
 
-  <main class="container">
-    <div class="section-title">
-      <h2>Oportunidades em Destaque</h2>
-    </div>
+      <div id="feedLoading" class="feed-loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Carregando ofertas...</p>
+      </div>
 
-    <div class="grid" id="offersGrid">
-      <p style="color: var(--text-muted); grid-column: 1 / -1;">Carregando anúncios...</p>
-    </div>
+      <div id="feedEmpty" class="feed-empty" hidden>
+        <svg viewBox="0 0 24 24" width="48" height="48" aria-hidden="true"><path d="M4 7h16M4 7l2-3h12l2 3M4 7v13a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7M9 11h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3>Ainda não há ofertas por aqui</h3>
+        <p>Seja a primeira pessoa da comunidade a anunciar uma troca.</p>
+      </div>
+
+      <div id="offersGrid" class="offers-grid"></div>
+    </section>
   </main>
 
-  <!-- MODAL PERFIL / LOGIN / CADASTRO -->
-  <div id="authModal" class="modal-overlay">
-    <div class="modal-card">
-      <button class="modal-close" id="btnCloseModal">&times;</button>
-
-      <!-- LOGIN -->
-      <div id="loginFormContainer">
-        <h2 class="modal-title">Entrar no Trocaê</h2>
-        
-        <div id="unverifiedNotice" class="notice-box" style="display: none; border-color: var(--primary-red); background: rgba(255, 51, 85, 0.1);">
-          ⚠️ Sua conta ainda não foi verificada. Acesse seu e-mail e clique no link enviado. 
-          (Verifique a caixa de Span)
-          <button id="btnResendEmail" class="btn btn-outline" style="width: 100%; margin-top: 0.5rem; justify-content: center; font-size: 0.8rem;">📩 Reenviar Link de Confirmação</button>
-        </div>
-
-        <form id="formLogin">
-          <input type="email" id="loginEmail" class="form-input" placeholder="E-mail" required />
-          <input type="password" id="loginPassword" class="form-input" placeholder="Senha" required />
-          <button type="submit" id="btnSubmitLogin" class="btn btn-gradient" style="width: 100%; justify-content: center;">Entrar</button>
-        </form>
-
-        <p class="modal-toggle" style="text-align: center; margin-top: 1rem;">
-          Não tem conta? <a href="#" id="linkToRegister" style="color: var(--primary-blue);">Cadastre-se</a>
-        </p>
-      </div>
-
-      <!-- CADASTRO -->
-      <div id="registerFormContainer" style="display: none;">
-        <h2 class="modal-title">Criar Conta no Trocaê</h2>
-        
-        <div class="notice-box">
-          ℹ️ Enviaremos um link de confirmação para o seu e-mail para garantir a segurança da conta.
-        </div>
-
-        <form id="formRegister">
-          <input type="text" id="regName" class="form-input" placeholder="Nome e Sobrenome" required />
-          <input type="email" id="regEmail" class="form-input" placeholder="E-mail" required />
-          <input type="password" id="regPassword" class="form-input" placeholder="Senha (min. 6 caracteres)" required />
-          <input type="text" id="regCity" class="form-input" placeholder="Sua Cidade (Ex: Jaboatão, Recife)" required />
-          <input type="tel" id="regPhone" class="form-input" placeholder="WhatsApp (DDD + Número)" required />
-          <button type="submit" id="btnSubmitRegister" class="btn btn-gradient" style="width: 100%; justify-content: center;">Criar Conta</button>
-        </form>
-
-        <p class="modal-toggle" style="text-align: center; margin-top: 1rem;">
-          Já tem conta? <a href="#" id="linkToLogin" style="color: var(--primary-blue);">Fazer Login</a>
-        </p>
-      </div>
-
-      <!-- MEU PERFIL, ANÚNCIOS, CHATS, FAVORITOS E BLOQUEADOS -->
-      <div id="profileFormContainer" style="display: none;">
-
-        <div class="profile-tabs">
-          <button class="tab-btn active" id="tabInfoBtn">Minha Conta</button>
-          <button class="tab-btn" id="tabAdsBtn">Meus Anúncios</button>
-          <button class="tab-btn" id="tabChatsBtn">Conversas <span id="tabChatsBadge" class="badge-unread" style="display:none;">0</span></button>
-          <button class="tab-btn" id="tabFavsBtn">Favoritos ❤️</button>
-          <button class="tab-btn" id="tabBlockedBtn">Bloqueados 🚫</button>
-        </div>
-
-        <!-- ABA CONTA -->
-        <div id="tabInfoContent">
-          <div id="profileView">
-            <div style="background: var(--dark-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1.2rem;">
-              <div style="margin-bottom: 0.8rem;">
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Nome</div>
-                <div id="viewName" style="font-weight: 500;">Carregando...</div>
-              </div>
-              <div style="margin-bottom: 0.8rem;">
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">E-mail</div>
-                <div id="viewEmail" style="font-weight: 500;">Carregando...</div>
-              </div>
-              <div style="margin-bottom: 0.8rem;">
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">WhatsApp</div>
-                <div id="viewPhone" style="font-weight: 500;">Carregando...</div>
-              </div>
-              <div>
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Cidade / Endereço</div>
-                <div id="viewCity" style="font-weight: 500;">Carregando...</div>
-              </div>
-            </div>
-
-            <button id="btnEnableEdit" type="button" class="btn btn-outline" style="width: 100%; justify-content: center;">✏️ Editar Perfil</button>
-          </div>
-
-          <!-- FORMULÁRIO DE EDIÇÃO DE PERFIL -->
-          <form id="formProfile" style="display: none;">
-            <label style="font-size: 0.85rem; color: var(--text-muted); display: block;">Nome e Sobrenome</label>
-            <input type="text" id="profName" class="form-input" required />
-
-            <label style="font-size: 0.85rem; color: var(--text-muted); display: block;">E-mail</label>
-            <input type="email" id="profEmail" class="form-input" required />
-
-            <label style="font-size: 0.85rem; color: var(--text-muted); display: block;">WhatsApp</label>
-            <input type="tel" id="profPhone" class="form-input" required />
-
-            <label style="font-size: 0.85rem; color: var(--text-muted); display: block;">Cidade</label>
-            <input type="text" id="profCity" class="form-input" required />
-
-            <button type="submit" id="btnSaveProfile" class="btn btn-gradient" style="width: 100%; justify-content: center; margin-top: 0.5rem;">Salvar Alterações</button>
-            <button type="button" id="btnCancelEdit" class="btn btn-outline" style="width: 100%; justify-content: center; margin-top: 0.5rem;">Cancelar</button>
-          </form>
-
-          <button id="btnLogoutModal" class="btn btn-outline" style="width: 100%; justify-content: center; margin-top: 1.5rem; border-color: var(--primary-red); color: var(--primary-red);">Sair da Conta</button>
-        </div>
-
-        <!-- ABA ANÚNCIOS -->
-        <div id="tabAdsContent" style="display: none;">
-          <div id="myAdsList">
-            <p style="color: var(--text-muted);">Carregando seus anúncios...</p>
-          </div>
-        </div>
-
-        <!-- ABA HISTÓRICO DE CONVERSAS -->
-        <div id="tabChatsContent" style="display: none;">
-          <div id="myChatsList">
-            <p style="color: var(--text-muted);">Carregando suas conversas...</p>
-          </div>
-        </div>
-
-        <!-- ABA FAVORITOS -->
-        <div id="tabFavsContent" style="display: none;">
-          <div id="myFavsList">
-            <p style="color: var(--text-muted);">Carregando seus favoritos...</p>
-          </div>
-        </div>
-
-        <!-- ABA BLOQUEADOS -->
-        <div id="tabBlockedContent" style="display: none;">
-          <div id="myBlockedList">
-            <p style="color: var(--text-muted);">Carregando usuários bloqueados...</p>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-
-  <!-- MODAL DE VISUALIZAÇÃO DE DETALHES DO ANÚNCIO -->
-  <div id="viewAdModal" class="modal-overlay">
-    <div class="modal-card">
-      <button class="modal-close" id="btnCloseViewAdModal">&times;</button>
-      <div id="viewAdContent"></div>
-    </div>
-  </div>
-
-  <!-- MODAL DE ANÚNCIO (CRIAR / EDITAR) -->
-  <div id="newAdModal" class="modal-overlay">
-    <div class="modal-card">
-      <button class="modal-close" id="btnCloseAdModal">&times;</button>
-      <h2 class="modal-title" id="adModalTitle">Novo Anúncio de Troca</h2>
-
-      <form id="formNewAd">
-        <input type="hidden" id="editingAdId" value="" />
-        <label style="font-size: 0.85rem; color: var(--text-muted); display: block;">O que você oferece?</label>
-        <input type="text" id="adTitle" class="form-input" placeholder="Ex: Bicicleta Aro 29" required />
-
-        <div style="display: flex; gap: 0.8rem;">
-          <div style="flex: 1;">
-            <label style="font-size: 0.85rem; color: var(--text-muted); display: block;">Tipo</label>
-            <select id="adType" class="category-select form-input" required>
-              <option value="produto">Produto</option>
-              <option value="servico">Serviço</option>
-            </select>
-          </div>
-          <div style="flex: 1;">
-            <label style="font-size: 0.85rem; color: var(--text-muted); display: block;">Categoria</label>
-            <select id="adCategory" class="category-select form-input" required>
-              <option value="tecnologia">Tecnologia</option>
-              <option value="construcao">Construção</option>
-              <option value="aulas">Aulas</option>
-              <option value="beleza">Beleza</option>
-              <option value="automoveis">Automóveis</option>
-              <option value="roupas">Roupas</option>
-              <option value="esportes">Esportes</option>
-              <option value="">Outros</option>
-            </select>
-          </div>
-        </div>
-
-        <label style="font-size: 0.85rem; color: var(--text-muted); display: block;">O que você aceita em troca?</label>
-        <input type="text" id="adWants" class="form-input" placeholder="Ex: Celular, Serviços elétricos" required />
-
-        <label style="font-size: 0.85rem; color: var(--text-muted); display: block;">Descrição detalhada</label>
-        <textarea id="adDescription" class="form-textarea" placeholder="Descreva os detalhes do item..." required></textarea>
-
-        <label style="font-size: 0.85rem; color: var(--text-muted); display: block;">Fotos do Item (Até 6 fotos)</label>
-        <input type="file" id="adImageFiles" class="form-input" accept="image/*" multiple />
-
-        <button type="submit" id="btnPublishAd" class="btn btn-gradient" style="width: 100%; justify-content: center; margin-top: 0.5rem;">Publicar Anúncio</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL DE CHAT EM TEMPO REAL COM OPÇÃO DE BLOQUEIO -->
-  <div id="chatModal" class="modal-overlay">
-    <div class="modal-card">
-      <button class="modal-close" id="btnCloseChatModal">&times;</button>
-      
-      <div class="chat-header-bar">
-        <div>
-          <h2 id="chatModalTitle" style="font-size: 1.1rem; margin-bottom: 0.2rem;">Chat da Troca</h2>
-          <p id="chatModalSubtitle" style="font-size: 0.78rem; color: var(--text-muted);"></p>
-        </div>
-        <button id="btnBlockUser" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border-color: var(--primary-red); color: var(--primary-red);">
-          🚫 Bloquear
-        </button>
-      </div>
-
-      <div id="chatMessages" class="chat-messages-container">
-        <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">Carregando mensagens...</p>
-      </div>
-
-      <form id="formSendMessage" class="chat-input-row">
-        <input type="text" id="chatInputMessage" class="form-input" style="margin-bottom: 0;" placeholder="Digite sua mensagem..." required />
-        <button type="submit" id="btnSubmitMsg" class="btn btn-gradient">Enviar</button>
-      </form>
-      <p id="chatBlockedNotice" style="display: none; color: var(--primary-red); font-size: 0.85rem; text-align: center; margin-top: 0.5rem; font-weight: bold;">
-        🚫 Usuário bloqueado. Desbloqueie para voltar a conversar.
-      </p>
-    </div>
-  </div>
-
-  <!-- VISUALIZADOR DE GALERIA EM TELA CHEIA (ZOOM) -->
-  <div id="galleryViewer" class="gallery-viewer-modal">
-    <button class="modal-close" id="btnCloseGallery" style="top: 2rem; right: 2rem;">&times;</button>
-    <div class="gallery-img-container">
-      <button class="gallery-nav-btn gallery-prev" id="btnPrevImg">&#10094;</button>
-      <img id="galleryFullImg" class="gallery-img-full" src="" alt="Zoom Foto" />
-      <button class="gallery-nav-btn gallery-next" id="btnNextImg">&#10095;</button>
-    </div>
-    <div id="galleryCounter" style="color: #fff; margin-top: 1rem; font-weight: bold;"></div>
-  </div>
-
-  <footer>
-    <p>&copy; 2026 Trocaê — Conectando necessidades através do escambo inteligente.</p>
+  <footer class="footer">
+    <p>Trocaê — trocas locais para uma comunidade mais sustentável.</p>
+    <p class="footer-muted">Feito com <span aria-hidden="true">&lt;/&gt;</span> e boas trocas.</p>
   </footer>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import {
-      getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-      createUserWithEmailAndPassword, signInWithRedirect,
-      updateProfile, updateEmail, GoogleAuthProvider, signOut,
-      sendEmailVerification
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import {
-      getFirestore, doc, setDoc, addDoc, updateDoc, deleteDoc, getDoc,
-      collection, query, orderBy, onSnapshot, where, getDocs, arrayUnion, arrayRemove
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA-p54xblpgEqdv7eJ-HjN1FvCv12Vz-ZU",
-      authDomain: "trocae-f94e1.firebaseapp.com",
-      databaseURL: "https://trocae-f94e1-default-rtdb.firebaseio.com",
-      projectId: "trocae-f94e1",
-      storageBucket: "trocae-f94e1.firebasestorage.app",
-      messagingSenderId: "727780957751",
-      appId: "1:727780957751:web:0cc36e90d867031b8069b2"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let unsubscribeProfile = null;
-    let unsubscribeChatMessages = null;
-    let unsubscribeUnreadChats = null;
-    let currentUserData = null;
-    let userFavorites = [];
-    let userBlockedList = [];
-    let unreadCount = 0;
-    let allOffers = [];
-    let usersMap = {};
-    let currentGalleryImages = [];
-    let currentGalleryIndex = 0;
-    let currentChatId = null;
-    let currentChatOtherUserId = null;
-
-    let modalAdImages = [];
-    let modalAdImageIndex = 0;
-    let unverifiedUserTemp = null;
-
-    const FORBIDDEN_WORDS = [
-      "porra", "caralho", "puta", "puto", "foder", "foda", "buceta", "pica",
-      "pinto", "merda", "cacete", "arrombado", "desgraca", "viado",
-      "bastardo", "otario", "piranha", "vagabundo", "vagabunda", "corno"
-    ];
-
-    function containsForbiddenWords(text) {
-      if (!text) return false;
-      const normalized = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return FORBIDDEN_WORDS.some(word => new RegExp(`\\b${word}\\b`, 'i').test(normalized));
-    }
-
-    const authModal = document.getElementById('authModal');
-    const newAdModal = document.getElementById('newAdModal');
-    const chatModal = document.getElementById('chatModal');
-    const galleryViewer = document.getElementById('galleryViewer');
-    const viewAdModal = document.getElementById('viewAdModal');
-
-    const btnAuthModal = document.getElementById('btnAuthModal');
-    const btnNewAd = document.getElementById('btnNewAd');
-    const btnCloseModal = document.getElementById('btnCloseModal');
-    const btnCloseAdModal = document.getElementById('btnCloseAdModal');
-    const btnCloseChatModal = document.getElementById('btnCloseChatModal');
-    const btnCloseViewAdModal = document.getElementById('btnCloseViewAdModal');
-    const btnLogoutModal = document.getElementById('btnLogoutModal');
-    const btnBlockUser = document.getElementById('btnBlockUser');
-    const btnResendEmail = document.getElementById('btnResendEmail');
-    const unverifiedNotice = document.getElementById('unverifiedNotice');
-
-    const tabInfoBtn = document.getElementById('tabInfoBtn');
-    const tabAdsBtn = document.getElementById('tabAdsBtn');
-    const tabChatsBtn = document.getElementById('tabChatsBtn');
-    const tabFavsBtn = document.getElementById('tabFavsBtn');
-    const tabBlockedBtn = document.getElementById('tabBlockedBtn');
-
-    const tabInfoContent = document.getElementById('tabInfoContent');
-    const tabAdsContent = document.getElementById('tabAdsContent');
-    const tabChatsContent = document.getElementById('tabChatsContent');
-    const tabFavsContent = document.getElementById('tabFavsContent');
-    const tabBlockedContent = document.getElementById('tabBlockedContent');
-
-    const myAdsList = document.getElementById('myAdsList');
-    const myChatsList = document.getElementById('myChatsList');
-    const myFavsList = document.getElementById('myFavsList');
-    const myBlockedList = document.getElementById('myBlockedList');
-
-    const offersGrid = document.getElementById('offersGrid');
-    const searchInput = document.getElementById('searchInput');
-    const categoryFilter = document.getElementById('categoryFilter');
-    const typeFilter = document.getElementById('typeFilter');
-    const btnSearch = document.getElementById('btnSearch');
-
-    function resetTabs() {
-      tabInfoBtn.classList.remove('active');
-      tabAdsBtn.classList.remove('active');
-      tabChatsBtn.classList.remove('active');
-      tabFavsBtn.classList.remove('active');
-      tabBlockedBtn.classList.remove('active');
-
-      tabInfoContent.style.display = 'none';
-      tabAdsContent.style.display = 'none';
-      tabChatsContent.style.display = 'none';
-      tabFavsContent.style.display = 'none';
-      tabBlockedContent.style.display = 'none';
-    }
-
-    tabInfoBtn.addEventListener('click', () => {
-      resetTabs();
-      tabInfoBtn.classList.add('active');
-      tabInfoContent.style.display = 'block';
-    });
-
-    tabAdsBtn.addEventListener('click', () => {
-      resetTabs();
-      tabAdsBtn.classList.add('active');
-      tabAdsContent.style.display = 'block';
-      renderMyAds();
-    });
-
-    tabChatsBtn.addEventListener('click', () => {
-      resetTabs();
-      tabChatsBtn.classList.add('active');
-      tabChatsContent.style.display = 'block';
-      renderMyChats();
-    });
-
-    tabFavsBtn.addEventListener('click', () => {
-      resetTabs();
-      tabFavsBtn.classList.add('active');
-      tabFavsContent.style.display = 'block';
-      renderMyFavs();
-    });
-
-    tabBlockedBtn.addEventListener('click', () => {
-      resetTabs();
-      tabBlockedBtn.classList.add('active');
-      tabBlockedContent.style.display = 'block';
-      renderMyBlocked();
-    });
-
-    btnNewAd.addEventListener('click', () => {
-      if (!auth.currentUser || !auth.currentUser.emailVerified) {
-        showModalTab('login');
-        return;
-      }
-      document.getElementById('formNewAd').reset();
-      document.getElementById('editingAdId').value = "";
-      document.getElementById('adModalTitle').textContent = "Novo Anúncio de Troca";
-      newAdModal.style.display = 'flex';
-    });
-
-    btnCloseAdModal.addEventListener('click', () => newAdModal.style.display = 'none');
-    btnCloseModal.addEventListener('click', () => authModal.style.display = 'none');
-    btnCloseViewAdModal.addEventListener('click', () => viewAdModal.style.display = 'none');
-    btnCloseChatModal.addEventListener('click', () => {
-      if (unsubscribeChatMessages) unsubscribeChatMessages();
-      chatModal.style.display = 'none';
-    });
-
-    function showModalTab(tab) {
-      document.getElementById('loginFormContainer').style.display = 'none';
-      document.getElementById('registerFormContainer').style.display = 'none';
-      document.getElementById('profileFormContainer').style.display = 'none';
-
-      if (tab === 'login') document.getElementById('loginFormContainer').style.display = 'block';
-      if (tab === 'register') document.getElementById('registerFormContainer').style.display = 'block';
-      if (tab === 'profile') {
-        document.getElementById('profileFormContainer').style.display = 'block';
-        
-        const activeTabBtn = document.querySelector('.profile-tabs .tab-btn.active');
-        if (activeTabBtn) {
-          activeTabBtn.click();
-        } else {
-          tabInfoBtn.click();
-        }
-      }
-      authModal.style.display = 'flex';
-    }
-
-    btnAuthModal.addEventListener('click', () => {
-      if (auth.currentUser && auth.currentUser.emailVerified) showModalTab('profile');
-      else showModalTab('login');
-    });
-
-    btnLogoutModal.addEventListener('click', async () => {
-      if (unsubscribeProfile) unsubscribeProfile();
-      if (unsubscribeUnreadChats) unsubscribeUnreadChats();
-      await signOut(auth);
-      authModal.style.display = 'none';
-    });
-
-    onSnapshot(collection(db, "users"), (snapshot) => {
-      usersMap = {};
-      snapshot.forEach(docSnap => {
-        usersMap[docSnap.id] = docSnap.data();
-      });
-      renderOffers(allOffers);
-    });
-
-    onAuthStateChanged(auth, async (user) => {
-      if (unsubscribeProfile) unsubscribeProfile();
-      if (unsubscribeUnreadChats) unsubscribeUnreadChats();
-
-      if (user) {
-        await user.reload(); // Atualiza o status do e-mail do Firebase Auth
-        
-        // SE O E-MAIL NÃO FOI VERIFICADO
-        if (!user.emailVerified) {
-          btnAuthModal.textContent = "Entrar / Cadastrar";
-          currentUserData = null;
-          userFavorites = [];
-          userBlockedList = [];
-          document.querySelectorAll('.auth-only').forEach(el => el.style.display = 'none');
-          return;
-        }
-
-        unverifiedNotice.style.display = 'none';
-        document.querySelectorAll('.auth-only').forEach(el => el.style.display = 'inline-flex');
-        const userRef = doc(db, "users", user.uid);
-        unsubscribeProfile = onSnapshot(userRef, (snapshot) => {
-          if (snapshot.exists()) {
-            currentUserData = snapshot.data();
-            userFavorites = currentUserData.favorites || [];
-            userBlockedList = currentUserData.blockedUsers || [];
-            renderProfileData(currentUserData);
-            renderOffers(allOffers);
-            if (tabFavsContent.style.display === 'block') renderMyFavs();
-            if (tabBlockedContent.style.display === 'block') renderMyBlocked();
-          }
-        });
-
-        setupUnreadNotifications(user.uid);
-      } else {
-        btnAuthModal.textContent = "Entrar / Cadastrar";
-        currentUserData = null;
-        userFavorites = [];
-        userBlockedList = [];
-        document.querySelectorAll('.auth-only').forEach(el => el.style.display = 'none');
-        renderOffers(allOffers);
-      }
-    });
-
-    function setupUnreadNotifications(userId) {
-      const chatsQuery = query(collection(db, "chats"), where("visibleTo", "array-contains", userId));
-      unsubscribeUnreadChats = onSnapshot(chatsQuery, (snapshot) => {
-        let count = 0;
-        snapshot.docs.forEach(docSnap => {
-          const data = docSnap.data();
-          if (data.lastSenderId && data.lastSenderId !== userId && data.hasUnread === true) {
-            count++;
-          }
-        });
-
-        unreadCount = count;
-        updateNotificationBadges();
-      });
-    }
-
-    function updateNotificationBadges() {
-      const tabBadge = document.getElementById('tabChatsBadge');
-      const name = currentUserData?.name || auth.currentUser?.displayName || 'Usuário';
-
-      if (unreadCount > 0) {
-        btnAuthModal.textContent = `🔔 ${name} (${unreadCount})`;
-        tabBadge.textContent = unreadCount;
-        tabBadge.style.display = 'inline-block';
-      } else {
-        btnAuthModal.textContent = `👤 ${name}`;
-        tabBadge.style.display = 'none';
-      }
-    }
-
-    function renderProfileData(data) {
-      const name = data.name || 'Usuário';
-      const email = data.email || auth.currentUser?.email || '-';
-      updateNotificationBadges();
-
-      document.getElementById('viewName').textContent = name;
-      document.getElementById('viewEmail').textContent = email;
-      document.getElementById('viewPhone').textContent = data.phone || 'Não informado';
-      document.getElementById('viewCity').textContent = data.city || 'Não informado';
-
-      document.getElementById('profName').value = name;
-      document.getElementById('profEmail').value = email;
-      document.getElementById('profPhone').value = data.phone || '';
-      document.getElementById('profCity').value = data.city || '';
-    }
-
-    document.getElementById('formProfile').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const btnSave = document.getElementById('btnSaveProfile');
-      btnSave.disabled = true;
-      btnSave.textContent = "Salvando...";
-
-      try {
-        const newName = document.getElementById('profName').value.trim();
-        const newEmail = document.getElementById('profEmail').value.trim();
-        const newPhone = document.getElementById('profPhone').value.trim();
-        const newCity = document.getElementById('profCity').value.trim();
-
-        if (newEmail !== user.email) {
-          await updateEmail(user, newEmail);
-          await sendEmailVerification(user);
-          alert("E-mail alterado! Reenviamos um link de verificação para o seu novo e-mail.");
-        }
-
-        await updateDoc(doc(db, "users", user.uid), {
-          name: newName,
-          email: newEmail,
-          phone: newPhone,
-          city: newCity
-        });
-
-        await updateProfile(user, { displayName: newName });
-        alert("Perfil atualizado com sucesso!");
-        document.getElementById('profileView').style.display = 'block';
-        document.getElementById('formProfile').style.display = 'none';
-      } catch (err) {
-        alert("Erro ao salvar perfil: " + err.message);
-      } finally {
-        btnSave.disabled = false;
-        btnSave.textContent = "Salvar Alterações";
-      }
-    });
-
-    function processImageFile(file) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width, height = img.height;
-            const maxDim = 800;
-            if (width > height) {
-              if (width > maxDim) { height *= maxDim / width; width = maxDim; }
-            } else {
-              if (height > maxDim) { width *= maxDim / height; height = maxDim; }
-            }
-            canvas.width = width; canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 0.7));
-          };
-          img.onerror = () => resolve(null);
-          img.src = event.target.result;
-        };
-        reader.onerror = () => resolve(null);
-        reader.readAsDataURL(file);
-      });
-    }
-
-    async function processMultipleImages(fileList) {
-      const files = Array.from(fileList).slice(0, 6);
-      const results = await Promise.all(files.map(file => processImageFile(file)));
-      return results.filter(res => res !== null);
-    }
-
-    document.getElementById('formNewAd').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const user = auth.currentUser;
-      if (!user || !user.emailVerified) return;
-
-      const adId = document.getElementById('editingAdId').value;
-      const title = document.getElementById('adTitle').value.trim();
-      const type = document.getElementById('adType').value;
-      const category = document.getElementById('adCategory').value;
-      const wants = document.getElementById('adWants').value.trim();
-      const description = document.getElementById('adDescription').value.trim();
-      const fileInput = document.getElementById('adImageFiles');
-
-      if (containsForbiddenWords(title) || containsForbiddenWords(wants) || containsForbiddenWords(description)) {
-        alert("Sua publicação contém palavras não permitidas.");
-        return;
-      }
-
-      const btnPublish = document.getElementById('btnPublishAd');
-      btnPublish.disabled = true;
-      btnPublish.textContent = "Processando fotos e salvando...";
-
-      try {
-        let images = [];
-        if (fileInput.files && fileInput.files.length > 0) {
-          images = await processMultipleImages(fileInput.files);
-        }
-
-        const userName = currentUserData?.name || user.displayName || "Usuário";
-        const userCity = currentUserData?.city || "Brasil";
-        const userPhone = currentUserData?.phone || "";
-
-        if (adId) {
-          const existingOffer = allOffers.find(o => o.id === adId);
-          const updateData = {
-            title, type, category, wants, description,
-            userName, userCity, userPhone
-          };
-          if (images.length > 0) {
-            updateData.images = images;
-          } else if (existingOffer && existingOffer.images) {
-            updateData.images = existingOffer.images;
-          }
-
-          await updateDoc(doc(db, "offers", adId), updateData);
-          alert("Anúncio atualizado com sucesso!");
-        } else {
-          await addDoc(collection(db, "offers"), {
-            userId: user.uid,
-            userName, userCity, userPhone,
-            title, type, category, wants, description,
-            images: images,
-            createdAt: new Date().toISOString()
-          });
-          alert("Anúncio publicado com sucesso!");
-        }
-
-        newAdModal.style.display = 'none';
-        renderMyAds();
-      } catch (err) {
-        alert("Erro ao salvar anúncio: " + err.message);
-      } finally {
-        btnPublish.disabled = false;
-        btnPublish.textContent = "Publicar Anúncio";
-      }
-    });
-
-    const offersQuery = query(collection(db, "offers"), orderBy("createdAt", "desc"));
-    onSnapshot(offersQuery, (snapshot) => {
-      allOffers = [];
-      snapshot.forEach(docSnap => allOffers.push({ id: docSnap.id, ...docSnap.data() }));
-      renderOffers(allOffers);
-      renderMyAds();
-    });
-
-    function renderOffers(offers) {
-      const visibleOffers = offers.filter(o => !userBlockedList.includes(o.userId));
-
-      if (visibleOffers.length === 0) {
-        offersGrid.innerHTML = `<p style="color: var(--text-muted); grid-column: 1 / -1;">Nenhum anúncio encontrado.</p>`;
-        return;
-      }
-
-      offersGrid.innerHTML = visibleOffers.map(offer => {
-        const badgeClass = offer.type === 'servico' ? 'badge-servico' : 'badge-produto';
-        const typeText = offer.type === 'servico' ? 'Serviço' : 'Produto';
-        const isFav = userFavorites.includes(offer.id);
-
-        let imagesList = [];
-        if (Array.isArray(offer.images) && offer.images.length > 0) {
-          imagesList = offer.images;
-        } else if (offer.imageUrl) {
-          imagesList = [offer.imageUrl];
-        }
-
-        let galleryHtml = '';
-        if (imagesList.length > 0) {
-          galleryHtml = `
-            <div class="card-gallery-preview" data-offer-id="${offer.id}">
-              <img src="${imagesList[0]}" class="card-img" alt="${escapeHtml(offer.title)}" />
-              ${imagesList.length > 1 ? `<div class="gallery-badge">📷 1/${imagesList.length}</div>` : ''}
-            </div>
-          `;
-        } else {
-          galleryHtml = `
-            <div class="card-gallery-preview" style="cursor: default;">
-              <div class="no-image-placeholder">
-                <span>🖼️ Sem foto</span>
-              </div>
-            </div>
-          `;
-        }
-
-        const authorProfile = usersMap[offer.userId];
-        const currentPhone = authorProfile?.phone || offer.userPhone || '';
-        const phoneClean = currentPhone.replace(/\D/g, '');
-
-        const waBtn = phoneClean ?
-          `<a href="https://wa.me/55${phoneClean}?text=Olá! Vi seu anúncio no Trocaê: ${encodeURIComponent(offer.title)}" target="_blank" class="btn btn-whatsapp" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">📱 WhatsApp</a>` :
-          `<span style="font-size:0.75rem; color:var(--text-muted);">Sem WhatsApp</span>`;
-
-        return `
-          <div class="card">
-            <button class="btn-fav" title="${isFav ? 'Remover dos favoritos' : 'Favoritar'}" onclick="toggleFavorite('${offer.id}')">
-              ${isFav ? '❤️' : '🤍'}
-            </button>
-            ${galleryHtml}
-            <div class="card-body">
-              <span class="card-badge ${badgeClass}">${typeText}</span>
-              <h3 class="card-title">${escapeHtml(offer.title)}</h3>
-
-              <div class="description-container">
-                <p class="card-desc-text collapsed" id="desc-${offer.id}">${escapeHtml(offer.description)}</p>
-                <button class="btn-toggle-desc" id="btn-desc-${offer.id}" onclick="toggleDesc('${offer.id}')">Ler mais</button>
-              </div>
-
-              <div class="card-wants">
-                🔄 <strong>Procura:</strong> ${escapeHtml(offer.wants)}
-              </div>
-              <div class="card-footer">
-                <div class="user-info">
-                  <span>👤 ${escapeHtml(authorProfile?.name || offer.userName)}</span>
-                  <span class="user-location">📍 ${escapeHtml(authorProfile?.city || offer.userCity)}</span>
-                </div>
-                <div style="display: flex; gap: 0.4rem;">
-                  <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: var(--primary-blue);" onclick="openChatForOffer('${offer.id}', '${offer.userId}')">💬 Chat</button>
-                  ${waBtn}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      document.querySelectorAll('.card-gallery-preview[data-offer-id]').forEach(el => {
-        el.addEventListener('click', () => {
-          const id = el.getAttribute('data-offer-id');
-          openGallery(id, 0);
-        });
-      });
-
-      setTimeout(() => {
-        visibleOffers.forEach(offer => {
-          const descEl = document.getElementById(`desc-${offer.id}`);
-          const btnEl = document.getElementById(`btn-desc-${offer.id}`);
-          if (descEl && btnEl) {
-            if (descEl.scrollHeight > descEl.clientHeight) {
-              btnEl.style.display = 'inline-block';
-            }
-          }
-        });
-      }, 50);
-    }
-
-    window.openAdDetails = function(offerId) {
-      const offer = allOffers.find(o => o.id === offerId);
-
-      if (!offer) {
-        alert("Este anúncio não está disponível!");
-        if (userFavorites.includes(offerId)) {
-          toggleFavorite(offerId);
-        }
-        return;
-      }
-
-      authModal.style.display = 'none';
-
-      const authorProfile = usersMap[offer.userId];
-      const currentPhone = authorProfile?.phone || offer.userPhone || '';
-      const phoneClean = currentPhone.replace(/\D/g, '');
-      const isFav = userFavorites.includes(offer.id);
-
-      modalAdImages = Array.isArray(offer.images) && offer.images.length > 0 ? offer.images : (offer.imageUrl ? [offer.imageUrl] : []);
-      modalAdImageIndex = 0;
-
-      let galleryHtml = '';
-      if (modalAdImages.length > 0) {
-        galleryHtml = `
-          <div class="card-gallery-preview" style="margin-bottom: 1rem; border-radius: 8px; position: relative;">
-            <img id="viewAdMainImg" src="${modalAdImages[0]}" class="card-img" onclick="openModalGalleryZoom()" style="cursor: zoom-in;" title="Clique para ampliar em tela cheia" />
-            ${modalAdImages.length > 1 ? `
-              <button onclick="navigateModalAdImg(-1, event)" class="gallery-nav-btn gallery-prev" style="left: 8px; padding: 0.5rem 0.8rem; font-size: 1rem;">&#10094;</button>
-              <button onclick="navigateModalAdImg(1, event)" class="gallery-nav-btn gallery-next" style="right: 8px; padding: 0.5rem 0.8rem; font-size: 1rem;">&#10095;</button>
-              <div id="viewAdImgBadge" class="gallery-badge">📷 1/${modalAdImages.length}</div>
-            ` : ''}
-          </div>
-        `;
-      }
-
-      const waBtn = phoneClean ?
-        `<a href="https://wa.me/55${phoneClean}?text=Olá! Vi seu anúncio no Trocaê: ${encodeURIComponent(offer.title)}" target="_blank" class="btn btn-whatsapp" style="flex:1; justify-content:center;">📱 WhatsApp</a>` : '';
-
-      const viewContent = document.getElementById('viewAdContent');
-      viewContent.innerHTML = `
-        <span class="card-badge ${offer.type === 'servico' ? 'badge-servico' : 'badge-produto'}" style="margin-bottom:0.8rem;">${offer.type.toUpperCase()}</span>
-        <h2 style="font-size: 1.5rem; margin-bottom: 1rem; word-break: break-word;">${escapeHtml(offer.title)}</h2>
-        ${galleryHtml}
-        <div style="margin-bottom: 1rem;">
-          <p class="card-desc-text" style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; word-break: break-word; overflow-wrap: break-word; white-space: pre-wrap;">${escapeHtml(offer.description)}</p>
+  <div id="authModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="modal-overlay" data-close-modal></div>
+    <div class="modal-card">
+      <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <h2 id="authModalTitle" class="modal-title">Bem-vindo ao Trocaê</h2>
+
+      <div class="auth-tabs" role="tablist">
+        <button id="tabLogin" class="tab-btn is-active" type="button" role="tab" aria-selected="true">Entrar</button>
+        <button id="tabSignup" class="tab-btn" type="button" role="tab" aria-selected="false">Criar conta</button>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="loginEmail">E-mail</label>
+          <input id="loginEmail" name="loginEmail" type="email" autocomplete="email" required>
         </div>
-        <div class="card-wants" style="margin-bottom: 1.2rem; word-break: break-word;">
-          🔄 <strong>Procura:</strong> ${escapeHtml(offer.wants)}
+        <div class="form-group">
+          <label for="loginPassword">Senha</label>
+          <input id="loginPassword" name="loginPassword" type="password" autocomplete="current-password" required>
         </div>
-        <div style="background: var(--dark-bg); padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.2rem;">
-          <div>👤 <strong>${escapeHtml(authorProfile?.name || offer.userName)}</strong></div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">📍 ${escapeHtml(authorProfile?.city || offer.userCity)}</div>
+        <p class="form-error" id="loginError" role="alert"></p>
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+      </form>
+
+      <form id="signupForm" novalidate hidden>
+        <div class="form-group">
+          <label for="signupName">Nome de exibição</label>
+          <input id="signupName" name="signupName" type="text" autocomplete="name" maxlength="40" required>
         </div>
-        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
-          <button class="btn btn-outline" style="flex:1; justify-content:center; border-color: var(--primary-blue);" onclick="openChatForOffer('${offer.id}', '${offer.userId}')">💬 Chat</button>
-          ${waBtn}
-          <button id="btnFavModalAd" class="btn btn-outline" style="border-color: rgba(255,255,255,0.2);" onclick="toggleFavorite('${offer.id}')">
-            ${isFav ? '❤️ Remover dos Favoritos' : '🤍 Adicionar aos Favoritos'}
-          </button>
+        <div class="form-group">
+          <label for="signupEmail">E-mail</label>
+          <input id="signupEmail" name="signupEmail" type="email" autocomplete="email" required>
         </div>
-      `;
-
-      viewAdModal.style.display = 'flex';
-    };
-
-    window.navigateModalAdImg = function(direction, e) {
-      if (e) e.stopPropagation();
-      if (modalAdImages.length <= 1) return;
-      modalAdImageIndex = (modalAdImageIndex + direction + modalAdImages.length) % modalAdImages.length;
-      
-      const imgEl = document.getElementById('viewAdMainImg');
-      const badgeEl = document.getElementById('viewAdImgBadge');
-      
-      if (imgEl) imgEl.src = modalAdImages[modalAdImageIndex];
-      if (badgeEl) badgeEl.textContent = `📷 ${modalAdImageIndex + 1}/${modalAdImages.length}`;
-    };
-
-    window.openModalGalleryZoom = function() {
-      if (modalAdImages.length === 0) return;
-      currentGalleryImages = modalAdImages;
-      currentGalleryIndex = modalAdImageIndex;
-      updateGalleryView();
-      galleryViewer.style.display = 'flex';
-    };
-
-    window.toggleFavorite = async function(offerId) {
-      const user = auth.currentUser;
-      if (!user || !user.emailVerified) {
-        showModalTab('login');
-        return;
-      }
-
-      if (userFavorites.includes(offerId)) {
-        userFavorites = userFavorites.filter(id => id !== offerId);
-      } else {
-        userFavorites.push(offerId);
-      }
-
-      renderOffers(allOffers);
-      renderMyFavs();
-
-      const btnFavModalAd = document.getElementById('btnFavModalAd');
-      if (btnFavModalAd) {
-        const isFav = userFavorites.includes(offerId);
-        btnFavModalAd.innerHTML = isFav ? '❤️ Remover dos Favoritos' : '🤍 Adicionar aos Favoritos';
-      }
-
-      try {
-        await updateDoc(doc(db, "users", user.uid), { favorites: userFavorites });
-      } catch (err) {
-        console.error("Erro ao sincronizar favoritos:", err);
-      }
-    };
-
-    function renderMyFavs() {
-      const user = auth.currentUser;
-      if (!user || !user.emailVerified) return;
-
-      if (userFavorites.length === 0) {
-        myFavsList.innerHTML = `<p style="color: var(--text-muted);">Você não tem anúncios nos favoritos.</p>`;
-        return;
-      }
-
-      myFavsList.innerHTML = userFavorites.map(favId => {
-        const offer = allOffers.find(o => o.id === favId);
-        
-        const title = offer ? escapeHtml(offer.title) : 'Anúncio Indisponível';
-        const sub = offer ? `${offer.type.toUpperCase()} • ${escapeHtml(offer.category)}` : 'Este item foi removido pelo anunciante';
-
-        return `
-          <div class="fav-item" id="fav-item-${favId}">
-            <div style="flex: 1; cursor: pointer; overflow: hidden;" onclick="openAdDetails('${favId}')">
-              <strong style="word-break: break-word;">${title}</strong>
-              <div style="font-size:0.75rem; color: var(--text-muted); word-break: break-word;">${sub}</div>
-            </div>
-            <div style="display:flex; gap: 0.4rem;">
-              <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border-color: var(--primary-red); color: var(--primary-red);" onclick="toggleFavorite('${favId}')">❌ Remover</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderMyBlocked() {
-      const user = auth.currentUser;
-      if (!user || !user.emailVerified) return;
-
-      if (userBlockedList.length === 0) {
-        myBlockedList.innerHTML = `<p style="color: var(--text-muted);">Nenhum usuário bloqueado no momento.</p>`;
-        return;
-      }
-
-      myBlockedList.innerHTML = userBlockedList.map(blockedUid => {
-        const name = usersMap[blockedUid]?.name || "Usuário Bloqueado";
-        return `
-          <div class="blocked-item">
-            <div>
-              <strong>👤 ${escapeHtml(name)}</strong>
-            </div>
-            <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border-color: var(--whatsapp-green); color: var(--whatsapp-green);" onclick="unblockUserDirect('${blockedUid}')">
-              🟢 Desbloquear
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    window.unblockUserDirect = async function(uidToUnblock) {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      try {
-        await updateDoc(doc(db, "users", user.uid), {
-          blockedUsers: arrayRemove(uidToUnblock)
-        });
-        alert("Usuário desbloqueado com sucesso!");
-        renderOffers(allOffers);
-        renderMyBlocked();
-      } catch (err) {
-        alert("Erro ao desbloquear usuário: " + err.message);
-      }
-    };
-
-    window.openChatForOffer = async function(offerId, ownerId) {
-      const user = auth.currentUser;
-      if (!user || !user.emailVerified) {
-        showModalTab('login');
-        return;
-      }
-
-      if (user.uid === ownerId) {
-        alert("Você não pode abrir um chat no seu próprio anúncio.");
-        return;
-      }
-
-      const offer = allOffers.find(o => o.id === offerId);
-      if (!offer) {
-        alert("Este anúncio não está disponível!");
-        return;
-      }
-
-      viewAdModal.style.display = 'none';
-
-      const chatId = [user.uid, ownerId, offerId].sort().join('_');
-      currentChatId = chatId;
-      currentChatOtherUserId = ownerId;
-
-      const chatRef = doc(db, "chats", chatId);
-      await setDoc(chatRef, {
-        offerId: offerId,
-        offerTitle: offer.title,
-        participants: [user.uid, ownerId],
-        visibleTo: arrayUnion(user.uid, ownerId),
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-
-      document.getElementById('chatModalTitle').textContent = `Chat: ${offer.title}`;
-      const ownerName = usersMap[ownerId]?.name || offer.userName || "Anunciante";
-      document.getElementById('chatModalSubtitle').textContent = `Com ${ownerName}`;
-
-      updateBlockButtonUI();
-      clearUnreadFlag(chatId);
-      listenMessages(chatId);
-      chatModal.style.display = 'flex';
-    };
-
-    window.openExistingChat = async function(chatId, offerTitle, otherUserId) {
-      authModal.style.display = 'none';
-      currentChatId = chatId;
-      currentChatOtherUserId = otherUserId;
-
-      document.getElementById('chatModalTitle').textContent = `Chat: ${offerTitle}`;
-      const ownerName = usersMap[otherUserId]?.name || "Anunciante";
-      document.getElementById('chatModalSubtitle').textContent = `Com ${ownerName}`;
-
-      updateBlockButtonUI();
-      clearUnreadFlag(chatId);
-      listenMessages(chatId);
-      chatModal.style.display = 'flex';
-    };
-
-    function updateBlockButtonUI() {
-      const isBlocked = userBlockedList.includes(currentChatOtherUserId);
-      const inputForm = document.getElementById('formSendMessage');
-      const notice = document.getElementById('chatBlockedNotice');
-
-      if (isBlocked) {
-        btnBlockUser.textContent = "🟢 Desbloquear";
-        btnBlockUser.style.borderColor = "var(--whatsapp-green)";
-        btnBlockUser.style.color = "var(--whatsapp-green)";
-        inputForm.style.display = 'none';
-        notice.style.display = 'block';
-      } else {
-        btnBlockUser.textContent = "🚫 Bloquear";
-        btnBlockUser.style.borderColor = "var(--primary-red)";
-        btnBlockUser.style.color = "var(--primary-red)";
-        inputForm.style.display = 'flex';
-        notice.style.display = 'none';
-      }
-    }
-
-    btnBlockUser.addEventListener('click', async () => {
-      const user = auth.currentUser;
-      if (!user || !currentChatOtherUserId) return;
-
-      const isBlocked = userBlockedList.includes(currentChatOtherUserId);
-      const userRef = doc(db, "users", user.uid);
-
-      if (isBlocked) {
-        await updateDoc(userRef, { blockedUsers: arrayRemove(currentChatOtherUserId) });
-        alert("Usuário desbloqueado!");
-      } else {
-        if (!confirm("Tem certeza que deseja bloquear este usuário? Você deixará de ver os anúncios e conversas com ele.")) return;
-        await updateDoc(userRef, { blockedUsers: arrayUnion(currentChatOtherUserId) });
-        alert("Usuário bloqueado com sucesso!");
-      }
-
-      updateBlockButtonUI();
-      renderOffers(allOffers);
-    });
-
-    async function clearUnreadFlag(chatId) {
-      const user = auth.currentUser;
-      if (!user) return;
-      try {
-        await updateDoc(doc(db, "chats", chatId), { hasUnread: false });
-      } catch (e) {}
-    }
-
-    function listenMessages(chatId) {
-      if (unsubscribeChatMessages) unsubscribeChatMessages();
-
-      const msgsQuery = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt", "asc"));
-      const chatContainer = document.getElementById('chatMessages');
-
-      unsubscribeChatMessages = onSnapshot(msgsQuery, (snapshot) => {
-        if (snapshot.empty) {
-          chatContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">Nenhuma mensagem ainda. Inicie a conversa!</p>`;
-          return;
-        }
-
-        const user = auth.currentUser;
-        chatContainer.innerHTML = snapshot.docs.map(docSnap => {
-          const msg = docSnap.data();
-          const isMine = msg.senderId === user.uid;
-          const time = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-
-          return `
-            <div class="chat-bubble ${isMine ? 'mine' : 'other'}">
-              <div>${escapeHtml(msg.text)}</div>
-              <div class="chat-bubble-time">${time}</div>
-            </div>
-          `;
-        }).join('');
-
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      });
-    }
-
-    document.getElementById('formSendMessage').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const user = auth.currentUser;
-      if (!user || !user.emailVerified || !currentChatId) return;
-
-      if (userBlockedList.includes(currentChatOtherUserId)) {
-        alert("Você precisa desbloquear o usuário antes de enviar mensagens.");
-        return;
-      }
-
-      const input = document.getElementById('chatInputMessage');
-      const text = input.value.trim();
-      if (!text) return;
-
-      if (containsForbiddenWords(text)) {
-        alert("Sua mensagem contém palavras não permitidas.");
-        return;
-      }
-
-      input.value = '';
-
-      try {
-        await addDoc(collection(db, "chats", currentChatId, "messages"), {
-          senderId: user.uid,
-          senderName: currentUserData?.name || user.displayName || "Usuário",
-          text: text,
-          createdAt: new Date().toISOString()
-        });
-
-        await updateDoc(doc(db, "chats", currentChatId), {
-          lastMessage: text,
-          lastSenderId: user.uid,
-          hasUnread: true,
-          visibleTo: arrayUnion(user.uid, currentChatOtherUserId),
-          updatedAt: new Date().toISOString()
-        });
-      } catch (err) {
-        alert("Erro ao enviar mensagem: " + err.message);
-      }
-    });
-
-    function renderMyChats() {
-      const user = auth.currentUser;
-      if (!user || !user.emailVerified) return;
-
-      const chatsQuery = query(collection(db, "chats"), where("visibleTo", "array-contains", user.uid));
-      onSnapshot(chatsQuery, (snapshot) => {
-        if (snapshot.empty) {
-          myChatsList.innerHTML = `<p style="color: var(--text-muted);">Você ainda não possui conversas.</p>`;
-          return;
-        }
-
-        myChatsList.innerHTML = snapshot.docs.map(docSnap => {
-          const chat = docSnap.data();
-          const otherUserId = chat.participants.find(p => p !== user.uid) || user.uid;
-
-          if (userBlockedList.includes(otherUserId)) return '';
-
-          const lastMsg = chat.lastMessage || 'Conversa iniciada...';
-          const isUnread = chat.lastSenderId && chat.lastSenderId !== user.uid && chat.hasUnread;
-
-          return `
-            <div class="chat-item" style="${isUnread ? 'border-color: var(--primary-red); background: rgba(255,51,85,0.05);' : ''}">
-              <div style="flex: 1; cursor: pointer; overflow: hidden;" onclick="openExistingChat('${docSnap.id}', '${escapeHtml(chat.offerTitle)}', '${otherUserId}')">
-                <strong style="word-break: break-word;">📦 ${escapeHtml(chat.offerTitle)} ${isUnread ? '🔔' : ''}</strong>
-                <div style="font-size:0.8rem; color: var(--text-muted); word-break: break-word;">${escapeHtml(lastMsg)}</div>
-              </div>
-              <div style="display: flex; gap: 0.4rem;">
-                <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="openExistingChat('${docSnap.id}', '${escapeHtml(chat.offerTitle)}', '${otherUserId}')">Abrir</button>
-                <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border-color: var(--primary-red); color: var(--primary-red);" onclick="deleteChatForMe('${docSnap.id}')">🗑️ Apagar</button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      });
-    }
-
-    window.deleteChatForMe = async function(chatId) {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      if (!confirm("Deseja apagar esta conversa para você? (A outra pessoa continuará com o histórico)")) return;
-
-      try {
-        const chatRef = doc(db, "chats", chatId);
-        const chatSnap = await getDoc(chatRef);
-
-        if (chatSnap.exists()) {
-          const chatData = chatSnap.data();
-          const visibleTo = chatData.visibleTo || [];
-
-          if (visibleTo.length <= 1) {
-            const msgsRef = collection(db, "chats", chatId, "messages");
-            const msgsSnap = await getDocs(msgsRef);
-            const deletePromises = msgsSnap.docs.map(mDoc => deleteDoc(doc(db, "chats", chatId, "messages", mDoc.id)));
-            await Promise.all(deletePromises);
-            await deleteDoc(chatRef);
-          } else {
-            await updateDoc(chatRef, {
-              visibleTo: arrayRemove(user.uid)
-            });
-          }
-          alert("Conversa removida do seu perfil.");
-        }
-      } catch (err) {
-        alert("Erro ao apagar conversa: " + err.message);
-      }
-    };
-
-    window.toggleDesc = function(id) {
-      const descEl = document.getElementById(`desc-${id}`);
-      const btn = document.getElementById(`btn-desc-${id}`);
-      if (descEl.classList.contains('collapsed')) {
-        descEl.classList.remove('collapsed');
-        btn.textContent = 'Recolher';
-      } else {
-        descEl.classList.add('collapsed');
-        btn.textContent = 'Ler mais';
-      }
-    };
-
-    window.openGallery = function(offerId, startIndex) {
-      const offer = allOffers.find(o => o.id === offerId);
-      if (!offer) return;
-
-      if (Array.isArray(offer.images) && offer.images.length > 0) {
-        currentGalleryImages = offer.images;
-      } else if (offer.imageUrl) {
-        currentGalleryImages = [offer.imageUrl];
-      } else {
-        return;
-      }
-
-      currentGalleryIndex = startIndex;
-      updateGalleryView();
-      galleryViewer.style.display = 'flex';
-    };
-
-    function updateGalleryView() {
-      if (currentGalleryImages.length === 0) return;
-      document.getElementById('galleryFullImg').src = currentGalleryImages[currentGalleryIndex];
-      document.getElementById('galleryCounter').textContent = `${currentGalleryIndex + 1} de ${currentGalleryImages.length}`;
-    }
-
-    document.getElementById('btnPrevImg').addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (currentGalleryImages.length <= 1) return;
-      currentGalleryIndex = (currentGalleryIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
-      updateGalleryView();
-    });
-
-    document.getElementById('btnNextImg').addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (currentGalleryImages.length <= 1) return;
-      currentGalleryIndex = (currentGalleryIndex + 1) % currentGalleryImages.length;
-      updateGalleryView();
-    });
-
-    document.getElementById('btnCloseGallery').addEventListener('click', () => {
-      galleryViewer.style.display = 'none';
-    });
-
-    function renderMyAds() {
-      const user = auth.currentUser;
-      if (!user || !user.emailVerified) return;
-
-      const myOffers = allOffers.filter(o => o.userId === user.uid);
-      if (myOffers.length === 0) {
-        myAdsList.innerHTML = `<p style="color: var(--text-muted);">Você ainda não tem anúncios cadastrados.</p>`;
-        return;
-      }
-
-      myAdsList.innerHTML = myOffers.map(offer => `
-        <div class="my-ad-item">
-          <div style="flex: 1; cursor: pointer; overflow: hidden;" onclick="openAdDetails('${offer.id}')">
-            <strong style="word-break: break-word;">${escapeHtml(offer.title)}</strong>
-            <div style="font-size:0.75rem; color: var(--text-muted); word-break: break-word;">${offer.type.toUpperCase()} • ${escapeHtml(offer.category)}</div>
-          </div>
-          <div style="display:flex; gap: 0.5rem;">
-            <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="editAd('${offer.id}')">✏️ Editar</button>
-            <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; border-color: var(--primary-red); color: var(--primary-red);" onclick="deleteAd('${offer.id}')">🗑️ Apagar</button>
-          </div>
+        <div class="form-group">
+          <label for="signupPassword">Senha</label>
+          <input id="signupPassword" name="signupPassword" type="password" autocomplete="new-password" minlength="6" required>
         </div>
-      `).join('');
-    }
+        <div class="form-group">
+          <label for="signupConfirm">Confirmar senha</label>
+          <input id="signupConfirm" name="signupConfirm" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
+        <p class="form-error" id="signupError" role="alert"></p>
+        <button type="submit" class="btn btn-primary btn-block">Criar conta</button>
+      </form>
+    </div>
+  </div>
 
-    window.editAd = function(id) {
-      const offer = allOffers.find(o => o.id === id);
-      if (!offer) return;
+  <div id="offerModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="offerModalTitle">
+    <div class="modal-overlay" data-close-modal></div>
+    <div class="modal-card">
+      <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <h2 id="offerModalTitle" class="modal-title">Nova oferta de troca</h2>
+      <p class="modal-subtitle">Descreva o item que você quer trocar.</p>
+      <form id="offerForm" novalidate>
+        <div class="form-group">
+          <label for="offerTitle">Título</label>
+          <input id="offerTitle" name="offerTitle" type="text" maxlength="80" placeholder="Ex.: Bicicleta aro 26 em bom estado" required>
+        </div>
+        <div class="form-group">
+          <label for="offerDescription">Descrição</label>
+          <textarea id="offerDescription" name="offerDescription" rows="4" maxlength="500" placeholder="Descreva o item, seu estado de conservação e o que você gostaria em troca." required></textarea>
+        </div>
+        <p class="form-error" id="offerError" role="alert"></p>
+        <button type="submit" class="btn btn-primary btn-block">Publicar oferta</button>
+      </form>
+    </div>
+  </div>
 
-      document.getElementById('editingAdId').value = offer.id;
-      document.getElementById('adTitle').value = offer.title;
-      document.getElementById('adType').value = offer.type;
-      document.getElementById('adCategory').value = offer.category;
-      document.getElementById('adWants').value = offer.wants;
-      document.getElementById('adDescription').value = offer.description;
-      document.getElementById('adModalTitle').textContent = "Editar Anúncio";
+  <div id="profileModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <div class="modal-overlay" data-close-modal></div>
+    <div class="modal-card">
+      <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <h2 id="profileModalTitle" class="modal-title">Meu perfil</h2>
 
-      authModal.style.display = 'none';
-      newAdModal.style.display = 'flex';
-    };
+      <div id="verificationBanner" class="verification-banner" hidden>
+        <p id="verificationText"></p>
+        <button id="btnResendVerification" class="btn btn-outline btn-sm" type="button">Reenviar e-mail de verificação</button>
+      </div>
 
-    window.deleteAd = async function(id) {
-      if (!confirm("Tem certeza que deseja apagar este anúncio?")) return;
-      try {
-        await deleteDoc(doc(db, "offers", id));
-        alert("Anúncio excluído com sucesso!");
-      } catch (err) {
-        alert("Erro ao excluir: " + err.message);
-      }
-    };
+      <form id="profileForm" novalidate>
+        <div class="form-group">
+          <label for="profileName">Nome de exibição</label>
+          <input id="profileName" name="profileName" type="text" maxlength="40" required>
+        </div>
+        <div class="form-group">
+          <label for="profileEmail">E-mail</label>
+          <input id="profileEmail" name="profileEmail" type="email" required>
+        </div>
+        <p class="form-error" id="profileError" role="alert"></p>
+        <button type="submit" class="btn btn-primary btn-block">Salvar alterações</button>
+      </form>
 
-    btnSearch.addEventListener('click', filterOffers);
-    searchInput.addEventListener('input', filterOffers);
-    categoryFilter.addEventListener('change', filterOffers);
-    typeFilter.addEventListener('change', filterOffers);
+      <hr class="divider">
 
-    function filterOffers() {
-      const q = searchInput.value.toLowerCase().trim();
-      const cat = categoryFilter.value;
-      const type = typeFilter.value;
+      <button id="btnDeleteAccount" class="btn btn-danger btn-block" type="button">Excluir minha conta</button>
+    </div>
+  </div>
 
-      const filtered = allOffers.filter(o => {
-        const matchQ = !q || o.title.toLowerCase().includes(q) || o.description.toLowerCase().includes(q) || o.wants.toLowerCase().includes(q);
-        const matchCat = !cat || o.category === cat;
-        const matchType = !type || o.type === type;
-        return matchQ && matchCat && matchType;
-      });
+  <div id="confirmModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal-overlay" data-close-modal></div>
+    <div class="modal-card modal-card-sm">
+      <h2 id="confirmTitle" class="modal-title"></h2>
+      <p id="confirmMessage" class="modal-message"></p>
+      <div class="modal-actions">
+        <button id="btnConfirmCancel" class="btn btn-secondary" type="button">Cancelar</button>
+        <button id="btnConfirmOk" class="btn btn-danger" type="button"></button>
+      </div>
+    </div>
+  </div>
 
-      renderOffers(filtered);
-    }
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-    function escapeHtml(text) {
-      if (!text) return '';
-      return text.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]);
-    }
-
-    /* --- LOGIN COM VERIFICAÇÃO DE E-MAIL --- */
-    document.getElementById('formLogin').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('btnSubmitLogin');
-      btn.disabled = true;
-      btn.textContent = "Entrando...";
-
-      try {
-        const userCred = await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
-        const user = userCred.user;
-        await user.reload();
-
-        if (!user.emailVerified) {
-          unverifiedUserTemp = user;
-          unverifiedNotice.style.display = 'block';
-          await signOut(auth);
-          return;
-        }
-
-        unverifiedNotice.style.display = 'none';
-        authModal.style.display = 'none';
-      } catch (err) { 
-        if (err.code === 'auth/invalid-credential') {
-          alert("E-mail ou senha incorretos.");
-        } else {
-          alert("Erro no login: " + err.message); 
-        }
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Entrar";
-      }
-    });
-
-    btnResendEmail.addEventListener('click', async () => {
-      if (unverifiedUserTemp) {
-        try {
-          await sendEmailVerification(unverifiedUserTemp);
-          alert("Um novo link de confirmação foi enviado para o seu e-mail!");
-        } catch (err) {
-          alert("Erro ao reenviar e-mail: Aguarde um momento antes de tentar novamente.");
-        }
-      } else {
-        alert("Por favor, preencha o login e a senha primeiro.");
-      }
-    });
-
-    /* --- CADASTRO COM ENVIO DE LINK DE VERIFICAÇÃO --- */
-    document.getElementById('formRegister').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const rawName = document.getElementById('regName').value.trim();
-      const nameParts = rawName.split(/\s+/);
-      if (nameParts.length < 2) return alert("Informe Nome e Sobrenome.");
-
-      const formattedName = `${nameParts[0]} ${nameParts[1]}`;
-      const regEmail = document.getElementById('regEmail').value.trim();
-      const btn = document.getElementById('btnSubmitRegister');
-      
-      btn.disabled = true;
-      btn.textContent = "Criando conta...";
-
-      try {
-        const userCred = await createUserWithEmailAndPassword(auth, regEmail, document.getElementById('regPassword').value);
-        const user = userCred.user;
-
-        await updateProfile(user, { displayName: formattedName });
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid, name: formattedName, email: regEmail,
-          city: document.getElementById('regCity').value, phone: document.getElementById('regPhone').value,
-          favorites: [], blockedUsers: [],
-          createdAt: new Date().toISOString()
-        }, { merge: true });
-
-        // Envia o link de verificação
-        await sendEmailVerification(user);
-        await signOut(auth);
-
-        alert("Conta criada com sucesso! Enviamos um link de confirmação para o seu e-mail. Por favor, confirme o e-mail antes de fazer login.(⚠️Verifique sua caixa de Span!)");
-        showModalTab('login');
-      } catch (err) { 
-        if (err.code === 'auth/email-already-in-use') {
-          alert("Este e-mail já está cadastrado em outra conta.");
-        } else {
-          alert("Erro ao criar conta: " + err.message); 
-        }
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Criar Conta";
-      }
-    });
-
-    document.getElementById('linkToRegister').addEventListener('click', (e) => { e.preventDefault(); showModalTab('register'); });
-    document.getElementById('linkToLogin').addEventListener('click', (e) => { e.preventDefault(); showModalTab('login'); });
-    document.getElementById('btnEnableEdit').addEventListener('click', () => {
-      document.getElementById('profileView').style.display = 'none';
-      document.getElementById('formProfile').style.display = 'block';
-    });
-    document.getElementById('btnCancelEdit').addEventListener('click', () => {
-      document.getElementById('profileView').style.display = 'block';
-      document.getElementById('formProfile').style.display = 'none';
-    });
-  </script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
