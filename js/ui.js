@@ -1,99 +1,171 @@
-//1
-let toastTimer = null;
+/**
+ * Trocaê – Utilitários de Interface (modais, toasts, tema, carousel)
+ */
 
-export function toast(message, type = "info", duration = 3500) {
-  const el = document.getElementById("toast");
-  if (!el) return;
-
-  el.textContent = message;
-  el.className = "toast";
-  if (type === "success") el.classList.add("is-success");
-  if (type === "error") el.classList.add("is-error");
-  el.hidden = false;
-
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    el.hidden = true;
-  }, duration);
+/* ========== Tema ========== */
+export function initTheme() {
+  const saved = localStorage.getItem("trocae-theme") || "light";
+  document.documentElement.setAttribute("data-theme", saved);
+  updateThemeIcon(saved);
 }
 
-export function openModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (!modal) return;
-  modal.hidden = false;
-  document.body.style.overflow = "hidden";
-  const firstInput = modal.querySelector("input, textarea, button");
-  if (firstInput) firstInput.focus({ preventScroll: true });
+export function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme") || "light";
+  const next = current === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("trocae-theme", next);
+  updateThemeIcon(next);
 }
 
-export function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (!modal) return;
-  modal.hidden = true;
-  if (!document.querySelector(".modal:not([hidden])")) {
-    document.body.style.overflow = "";
+function updateThemeIcon(theme) {
+  // Ícones já controlados via CSS
+}
+
+/* ========== Modais ========== */
+export function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+}
+
+export function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.remove("open");
+    if (!document.querySelector(".modal.open")) {
+      document.body.style.overflow = "";
+    }
   }
 }
 
 export function closeAllModals() {
-  document.querySelectorAll(".modal").forEach((m) => {
-    m.hidden = true;
-  });
+  document.querySelectorAll(".modal.open").forEach((m) => m.classList.remove("open"));
   document.body.style.overflow = "";
 }
 
-export function showError(elementId, message) {
-  const el = document.getElementById(elementId);
-  if (el) el.textContent = message || "";
+/* ========== Toast ========== */
+export function showToast(message, type = "info") {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(10px)";
+    toast.style.transition = "0.3s";
+    setTimeout(() => toast.remove(), 300);
+  }, 3200);
 }
 
-export function clearForm(form) {
-  form.reset();
-  form.querySelectorAll(".form-error").forEach((el) => {
-    el.textContent = "";
-  });
-}
-
-export function setFormBusy(form, busy) {
-  const submit = form.querySelector('button[type="submit"]');
-  if (submit) {
-    submit.disabled = busy;
-    submit.dataset.label = submit.dataset.label || submit.textContent;
-    submit.textContent = busy ? "Aguarde..." : submit.dataset.label;
+/* ========== Carousel de Banners ========== */
+const BANNER_SLIDES = [
+  {
+    title: "Dê uma nova vida ao que você não usa mais",
+    subtitle: "Troque, reutilize e fortaleça a economia circular na sua região.",
+    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80"
+  },
+  {
+    title: "Troque o que você não quer, pelo que precisa",
+    subtitle: "Produtos por produtos, serviços por serviços ou mistos. Sem dinheiro.",
+    image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1200&q=80"
+  },
+  {
+    title: "Comunidade local, impacto real",
+    subtitle: "Conecte-se com vizinhos e construa relações baseadas em reciprocidade.",
+    image: "https://images.unsplash.com/photo-1582213782179-e0d53f98b2e3?w=1200&q=80"
+  },
+  {
+    title: "Sustentabilidade começa com uma troca",
+    subtitle: "Menos desperdício, mais valor. Junte-se ao movimento Trocaê.",
+    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&q=80"
   }
+];
+
+let currentSlide = 0;
+let carouselInterval = null;
+
+export function initCarousel() {
+  const track = document.getElementById("carouselTrack");
+  const dotsContainer = document.getElementById("carouselDots");
+  if (!track || !dotsContainer) return;
+
+  track.innerHTML = "";
+  dotsContainer.innerHTML = "";
+
+  BANNER_SLIDES.forEach((slide, i) => {
+    const div = document.createElement("div");
+    div.className = "carousel-slide";
+    div.style.backgroundImage = `url(${slide.image})`;
+    div.innerHTML = `
+      <div class="slide-content">
+        <h2>${slide.title}</h2>
+        <p>${slide.subtitle}</p>
+      </div>
+    `;
+    track.appendChild(div);
+
+    const dot = document.createElement("button");
+    dot.className = "dot" + (i === 0 ? " active" : "");
+    dot.setAttribute("aria-label", `Slide ${i + 1}`);
+    dot.addEventListener("click", () => goToSlide(i));
+    dotsContainer.appendChild(dot);
+  });
+
+  document.getElementById("carouselPrev")?.addEventListener("click", () => {
+    goToSlide(currentSlide - 1);
+    resetCarouselTimer();
+  });
+  document.getElementById("carouselNext")?.addEventListener("click", () => {
+    goToSlide(currentSlide + 1);
+    resetCarouselTimer();
+  });
+
+  startCarouselTimer();
 }
 
-export function formatDate(value) {
-  if (!value) return "";
-  const date = typeof value.toDate === "function" ? value.toDate() : new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
+function goToSlide(index) {
+  const track = document.getElementById("carouselTrack");
+  const dots = document.querySelectorAll(".carousel-dots .dot");
+  if (!track) return;
+
+  currentSlide = (index + BANNER_SLIDES.length) % BANNER_SLIDES.length;
+  track.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+  dots.forEach((d, i) => d.classList.toggle("active", i === currentSlide));
+}
+
+function startCarouselTimer() {
+  carouselInterval = setInterval(() => {
+    goToSlide(currentSlide + 1);
+  }, 8000);
+}
+
+function resetCarouselTimer() {
+  clearInterval(carouselInterval);
+  startCarouselTimer();
+}
+
+/* ========== Formatação ========== */
+export function formatDate(timestamp) {
+  if (!timestamp) return "";
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
   return date.toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "short",
-    year: "numeric",
+    year: "numeric"
   });
 }
 
-export function initials(name) {
-  const clean = String(name || "?").trim();
-  if (!clean) return "?";
-  const parts = clean.split(/\s+/).slice(0, 2);
-  return parts
-    .map((p) => p.charAt(0).toUpperCase())
-    .join("")
-    .slice(0, 2);
-}
-
-export function timeAgo(value) {
-  if (!value) return "";
-  const date = typeof value.toDate === "function" ? value.toDate() : new Date(value);
-  const diffMs = Date.now() - date.getTime();
-  const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "agora mesmo";
-  if (minutes < 60) return `há ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `há ${hours} h`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `há ${days} dia${days > 1 ? "s" : ""}`;
-  return formatDate(date);
+export function formatWhatsAppLink(number, offerTitle) {
+  const clean = String(number).replace(/\D/g, "");
+  const text = encodeURIComponent(
+    `Olá! Vi seu anúncio "${offerTitle}" no Trocaê e gostaria de conversar sobre a troca.`
+  );
+  return `https://wa.me/55${clean}?text=${text}`;
 }
