@@ -78,7 +78,7 @@ const BANNER_SLIDES = [
   {
     title: "Comunidade local, impacto real",
     subtitle: "Conecte-se com vizinhos e construa relações baseadas em reciprocidade.",
-    image: "https://images.unsplash.com/photo-1582213782179-e0d53f98b2e3?w=1200&q=80"
+    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&q=80"
   },
   {
     title: "Sustentabilidade começa com uma troca",
