@@ -366,11 +366,7 @@ function showConfigBanner() {
     "max-width:1120px;margin:20px auto 0;padding:14px 18px;border:1px solid " +
     "color-mix(in srgb, var(--color-warning) 40%, transparent);border-radius:12px;" +
     "background:var(--color-warning-soft);color:var(--color-text);font-size:0.92rem;";
-  banner.innerHTML =
-    "<strong>Configuração necessária:</strong> preencha as chaves reais do projeto " +
-    "<code>trocae-f94e1</code> em <code>js/config.js</code> para que o Firebase funcione.";
-  document.querySelector(".hero").after(banner);
-}
+  
 
 function bindEvents() {
   $("btnLogin").addEventListener("click", openAuthModal);
