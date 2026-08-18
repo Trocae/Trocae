@@ -1,234 +1,258 @@
-//Início 
-import { auth, db } from "./firebase-init.js";
+/**
+ * Trocaê – Módulo de Ofertas (CRUD + Feed + Imagens)
+ */
+
 import {
+  db,
+  storage,
   collection,
-  query,
-  orderBy,
-  limit,
-  onSnapshot,
-  addDoc,
   doc,
+  addDoc,
   getDoc,
+  getDocs,
+  updateDoc,
   deleteDoc,
+  setDoc,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
   serverTimestamp,
-} from "firebase/firestore";
-import { LOCAL_BLOCKED_USERS } from "./config.js";
-import { toast, initials, formatDate, timeAgo } from "./ui.js";
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
+} from "./firebase.js";
 
-const offersCache = new Map();
-const usersMap = new Map();
-const firestoreBlocked = new Set();
-const userBlockedList = new Set(LOCAL_BLOCKED_USERS);
+import { getCurrentUser, getCurrentUserData, isUserBlocked } from "./auth.js";
+import { showToast } from "./ui.js";
 
-const FEED_LIMIT = 100;
-let unsubscribeOfferListener = null;
-let unsubscribeUserListener = null;
-let unsubscribeBlockedListener = null;
-let feedInitStarted = false;
+const MAX_IMAGES = 6;
+let offersCache = [];
+let unsubscribeOffers = null;
 
-export function initFeed() {
-  if (feedInitStarted) return;
-  feedInitStarted = true;
-
-  const offersQuery = query(
-    collection(db, "offers"),
-    orderBy("createdAt", "desc"),
-    limit(FEED_LIMIT)
-  );
-
-  unsubscribeOfferListener = onSnapshot(
-    offersQuery,
-    (snapshot) => {
-      offersCache.clear();
-      snapshot.docs.forEach((offerDoc) => {
-        offersCache.set(offerDoc.id, { id: offerDoc.id, ...offerDoc.data() });
-      });
-      renderOffers();
-    },
-    (error) => {
-      console.error("[Trocaê] Erro ao carregar ofertas:", error);
-      showFeedLoading(false);
-      toast("Não foi possível carregar as ofertas.", "error");
-    }
-  );
-
-  const usersQuery = query(collection(db, "users"));
-  unsubscribeUserListener = onSnapshot(
-    usersQuery,
-    (snapshot) => {
-      usersMap.clear();
-      snapshot.docs.forEach((userDoc) => {
-        usersMap.set(userDoc.id, userDoc.data());
-      });
-      renderOffers();
-    },
-    (error) => {
-      console.error("[Trocaê] Erro ao carregar usuários:", error);
-    }
-  );
-
-  const blockedQuery = query(collection(db, "blockedUsers"));
-  unsubscribeBlockedListener = onSnapshot(
-    blockedQuery,
-    (snapshot) => {
-      firestoreBlocked.clear();
-      snapshot.docs.forEach((blockedDoc) => {
-        firestoreBlocked.add(blockedDoc.id);
-      });
-      syncBlockedList();
-      renderOffers();
-    },
-    (error) => {
-      console.error("[Trocaê] Erro ao carregar lista de bloqueio:", error);
-    }
-  );
-}
-
-function syncBlockedList() {
-  userBlockedList.clear();
-  LOCAL_BLOCKED_USERS.forEach((id) => userBlockedList.add(id));
-  firestoreBlocked.forEach((id) => userBlockedList.add(id));
-}
-
-export function stopFeed() {
-  if (unsubscribeOfferListener) unsubscribeOfferListener();
-  if (unsubscribeUserListener) unsubscribeUserListener();
-  if (unsubscribeBlockedListener) unsubscribeBlockedListener();
-  unsubscribeOfferListener = null;
-  unsubscribeUserListener = null;
-  unsubscribeBlockedListener = null;
-  feedInitStarted = false;
-}
-
-export function renderOffers() {
-  const grid = document.getElementById("offersGrid");
-  const empty = document.getElementById("feedEmpty");
-  if (!grid) return;
-
-  showFeedLoading(false);
-
-  grid.innerHTML = "";
-  const currentUser = auth?.currentUser;
-  let visibleCount = 0;
-
-  offersCache.forEach((offer) => {
-    const owner = usersMap.get(offer.userId);
-    if (!owner || userBlockedList.has(offer.userId)) {
-      return;
-    }
-    grid.appendChild(createOfferCard(offer, owner, currentUser));
-    visibleCount += 1;
-  });
-
-  if (empty) empty.hidden = visibleCount > 0;
-}
-
-function showFeedLoading(isLoading) {
-  const loading = document.getElementById("feedLoading");
-  if (loading) loading.hidden = !isLoading;
-}
-
-function createOfferCard(offer, owner, currentUser) {
-  const card = document.createElement("article");
-  card.className = "offer-card";
-
-  const header = document.createElement("div");
-  header.className = "offer-card-header";
-
-  const title = document.createElement("h3");
-  title.className = "offer-card-title";
-  title.textContent = offer.title || "Sem título";
-
-  header.appendChild(title);
-
-  if (currentUser && offer.userId === currentUser.uid) {
-    const badge = document.createElement("span");
-    badge.className = "card-badge";
-    badge.textContent = "Minha oferta";
-    header.appendChild(badge);
+/**
+ * Upload de imagens para Firebase Storage
+ * Retorna array de URLs
+ */
+async function uploadImages(files, offerId) {
+  const urls = [];
+  for (let i = 0; i < files.length && i < MAX_IMAGES; i++) {
+    const file = files[i];
+    const path = `offers/${offerId}/${Date.now()}_${i}_${file.name}`;
+    const storageRef = ref(storage, path);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    urls.push(url);
   }
-  card.appendChild(header);
+  return urls;
+}
 
-  const description = document.createElement("p");
-  description.className = "offer-card-description";
-  description.textContent = offer.description || "";
-  card.appendChild(description);
+/**
+ * Cria nova oferta
+ */
+export async function createOffer({ title, description, imageFiles }) {
+  const user = getCurrentUser();
+  if (!user) throw new Error("Faça login para publicar.");
+  if (!user.emailVerified) throw new Error("Verifique seu e-mail antes de publicar.");
 
-  const footer = document.createElement("div");
-  footer.className = "offer-card-footer";
-
-  const author = document.createElement("span");
-  author.className = "offer-author";
-  author.title = owner.name || "Usuário";
-
-  const avatar = document.createElement("span");
-  avatar.className = "avatar avatar-sm";
-  avatar.textContent = initials(owner.name);
-  author.appendChild(avatar);
-
-  const authorName = document.createElement("span");
-  authorName.className = "offer-author-name";
-  authorName.textContent = owner.name || "Usuário";
-  author.appendChild(authorName);
-
-  const date = document.createElement("time");
-  date.className = "offer-date";
-  date.dateTime = offer.createdAt?.toDate?.().toISOString?.() || "";
-  date.textContent = offer.createdAt ? timeAgo(offer.createdAt) : formatDate(new Date());
-  author.appendChild(date);
-
-  footer.appendChild(author);
-
-  if (currentUser && offer.userId === currentUser.uid) {
-    const deleteBtn = document.createElement("button");
-    deleteBtn.type = "button";
-    deleteBtn.className = "btn-delete";
-    deleteBtn.innerHTML =
-      '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Excluir';
-    deleteBtn.addEventListener("click", () => {
-      deleteBtn.disabled = true;
-      handleDeleteOffer(offer.id, currentUser.uid);
-    });
-    footer.appendChild(deleteBtn);
+  if (!imageFiles || imageFiles.length === 0) {
+    throw new Error("Adicione pelo menos uma imagem.");
+  }
+  if (imageFiles.length > MAX_IMAGES) {
+    throw new Error(`Máximo de ${MAX_IMAGES} imagens.`);
   }
 
-  card.appendChild(footer);
-  return card;
-}
-
-async function handleDeleteOffer(offerId, userId) {
-  try {
-    await deleteOffer(offerId, userId);
-    toast("Oferta excluída.", "success");
-  } catch (error) {
-    console.error("[Trocaê] Erro ao excluir oferta:", error);
-    toast(error.message || "Não foi possível excluir a oferta.", "error");
-  }
-}
-
-export async function createOffer({ title, description }) {
-  const user = auth.currentUser;
-  if (!user) throw new Error("auth/no-current-user");
-
-  await addDoc(collection(db, "offers"), {
+  const docRef = await addDoc(collection(db, "offers"), {
     title: title.trim(),
     description: description.trim(),
+    images: [],
     userId: user.uid,
-    createdAt: serverTimestamp(),
+    userName: user.displayName || "Usuário",
+    createdAt: serverTimestamp()
+  });
+
+  try {
+    const urls = await uploadImages(imageFiles, docRef.id);
+    await updateDoc(docRef, { images: urls });
+    return docRef.id;
+  } catch (err) {
+    await deleteDoc(docRef);
+    throw err;
+  }
+}
+
+/**
+ * Atualiza oferta existente
+ */
+export async function updateOffer(offerId, { title, description, imageFiles, existingImages }) {
+  const user = getCurrentUser();
+  if (!user) throw new Error("Não autenticado.");
+
+  const offerRef = doc(db, "offers", offerId);
+  const snap = await getDoc(offerRef);
+  if (!snap.exists()) throw new Error("Oferta não encontrada.");
+  if (snap.data().userId !== user.uid) throw new Error("Você não pode editar esta oferta.");
+
+  let images = existingImages || snap.data().images || [];
+
+  if (imageFiles && imageFiles.length > 0) {
+    const newUrls = await uploadImages(imageFiles, offerId);
+    images = [...images, ...newUrls].slice(0, MAX_IMAGES);
+  }
+
+  await updateDoc(offerRef, {
+    title: title.trim(),
+    description: description.trim(),
+    images
   });
 }
 
-export async function deleteOffer(offerId, userId) {
+/**
+ * Exclui oferta
+ */
+export async function deleteOffer(offerId) {
+  const user = getCurrentUser();
+  if (!user) throw new Error("Não autenticado.");
+
   const offerRef = doc(db, "offers", offerId);
-  const offerSnapshot = await getDoc(offerRef);
-
-  if (!offerSnapshot.exists()) {
-    throw new Error("Esta oferta não existe mais.");
-  }
-
-  if (offerSnapshot.data().userId !== userId) {
-    throw new Error("Você só pode excluir as suas próprias ofertas.");
-  }
+  const snap = await getDoc(offerRef);
+  if (!snap.exists()) return;
+  if (snap.data().userId !== user.uid) throw new Error("Permissão negada.");
 
   await deleteDoc(offerRef);
+}
+
+/**
+ * Escuta ofertas em tempo real e aplica filtros de integridade + bloqueio
+ */
+export function subscribeOffers(callback) {
+  if (unsubscribeOffers) unsubscribeOffers();
+
+  const q = query(collection(db, "offers"), orderBy("createdAt", "desc"));
+
+  unsubscribeOffers = onSnapshot(
+    q,
+    async (snapshot) => {
+      const raw = [];
+      snapshot.forEach((d) => raw.push({ id: d.id, ...d.data() }));
+
+      const validUserIds = new Set();
+      await Promise.all(
+        [...new Set(raw.map((o) => o.userId))].map(async (uid) => {
+          try {
+            const u = await getDoc(doc(db, "users", uid));
+            if (u.exists()) validUserIds.add(uid);
+          } catch (_) {}
+        })
+      );
+
+      let filtered = raw.filter((o) => validUserIds.has(o.userId));
+
+      const blocked = getCurrentUserData()?.userBlockedList || [];
+      if (blocked.length) {
+        filtered = filtered.filter((o) => !blocked.includes(o.userId));
+      }
+
+      offersCache = filtered;
+      callback(filtered);
+    },
+    (err) => {
+      console.error("Erro no snapshot de ofertas:", err);
+      callback([]);
+    }
+  );
+
+  return unsubscribeOffers;
+}
+
+export function getOffersCache() {
+  return offersCache;
+}
+
+/**
+ * Filtra localmente por termo de busca (título ou descrição)
+ */
+export function filterOffersBySearch(term) {
+  if (!term || !term.trim()) return offersCache;
+  const t = term.trim().toLowerCase();
+  return offersCache.filter(
+    (o) =>
+      (o.title || "").toLowerCase().includes(t) ||
+      (o.description || "").toLowerCase().includes(t)
+  );
+}
+
+/**
+ * Obtém uma oferta por ID
+ */
+export async function getOfferById(id) {
+  const snap = await getDoc(doc(db, "offers", id));
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...snap.data() };
+}
+
+/**
+ * Ofertas do usuário logado
+ */
+export async function getMyOffers() {
+  const user = getCurrentUser();
+  if (!user) return [];
+  const q = query(
+    collection(db, "offers"),
+    where("userId", "==", user.uid),
+    orderBy("createdAt", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+/**
+ * Favoritos
+ */
+export async function toggleFavorite(offerId) {
+  const user = getCurrentUser();
+  if (!user) throw new Error("Faça login para favoritar.");
+
+  const favId = `${user.uid}_${offerId}`;
+  const favRef = doc(db, "favorites", favId);
+  const snap = await getDoc(favRef);
+
+  if (snap.exists()) {
+    await deleteDoc(favRef);
+    return false;
+  } else {
+    await setDoc(favRef, {
+      userId: user.uid,
+      offerId,
+      createdAt: serverTimestamp()
+    });
+    return true;
+  }
+}
+
+export async function getFavorites() {
+  const user = getCurrentUser();
+  if (!user) return [];
+
+  const q = query(collection(db, "favorites"), where("userId", "==", user.uid));
+  const snap = await getDocs(q);
+  const offerIds = snap.docs.map((d) => d.data().offerId);
+
+  if (!offerIds.length) return [];
+
+  const offers = [];
+  for (const oid of offerIds) {
+    const o = await getOfferById(oid);
+    if (o) offers.push(o);
+  }
+  return offers;
+}
+
+export async function isFavorite(offerId) {
+  const user = getCurrentUser();
+  if (!user) return false;
+  const favId = `${user.uid}_${offerId}`;
+  const snap = await getDoc(doc(db, "favorites", favId));
+  return snap.exists();
 }
