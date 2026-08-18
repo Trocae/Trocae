@@ -31,8 +31,8 @@ import {
 const $ = (id) => document.getElementById(id);
 
 const FIREBASE_IS_CONFIGURED =
-  !firebaseConfig.apiKey.includes("SUA_API_KEY") &&
-  !firebaseConfig.appId.includes("SEU_APP");
+  !firebaseConfig.apiKey.includes("AIzaSyA-p54xblpgEqdv7eJ-HjN1FvCv12Vz-ZU") &&
+  !firebaseConfig.appId.includes("1:727780957751:web:0cc36e90d867031b8069b2");
 
 let currentUser = null;
 let confirmCallback = null;
