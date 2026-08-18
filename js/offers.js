@@ -63,6 +63,7 @@ export async function createOffer({ title, description, imageFiles }) {
     throw new Error(`Máximo de ${MAX_IMAGES} imagens.`);
   }
 
+  // Cria documento primeiro para obter ID
   const docRef = await addDoc(collection(db, "offers"), {
     title: title.trim(),
     description: description.trim(),
@@ -77,6 +78,7 @@ export async function createOffer({ title, description, imageFiles }) {
     await updateDoc(docRef, { images: urls });
     return docRef.id;
   } catch (err) {
+    // Rollback se upload falhar
     await deleteDoc(docRef);
     throw err;
   }
@@ -137,6 +139,7 @@ export function subscribeOffers(callback) {
       const raw = [];
       snapshot.forEach((d) => raw.push({ id: d.id, ...d.data() }));
 
+      // Filtro de integridade: userId ainda existe
       const validUserIds = new Set();
       await Promise.all(
         [...new Set(raw.map((o) => o.userId))].map(async (uid) => {
@@ -149,6 +152,7 @@ export function subscribeOffers(callback) {
 
       let filtered = raw.filter((o) => validUserIds.has(o.userId));
 
+      // Filtro de moderação: bloqueados
       const blocked = getCurrentUserData()?.userBlockedList || [];
       if (blocked.length) {
         filtered = filtered.filter((o) => !blocked.includes(o.userId));
@@ -194,17 +198,29 @@ export async function getOfferById(id) {
 
 /**
  * Ofertas do usuário logado
+ * (ordenação feita no cliente para evitar índice composto)
  */
 export async function getMyOffers() {
   const user = getCurrentUser();
   if (!user) return [];
+
+  // Consulta simples (não precisa de índice composto)
   const q = query(
     collection(db, "offers"),
-    where("userId", "==", user.uid),
-    orderBy("createdAt", "desc")
+    where("userId", "==", user.uid)
   );
+
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const offers = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  // Ordena no cliente (mais recente primeiro)
+  offers.sort((a, b) => {
+    const ta = a.createdAt?.toMillis?.() || 0;
+    const tb = b.createdAt?.toMillis?.() || 0;
+    return tb - ta;
+  });
+
+  return offers;
 }
 
 /**
@@ -220,14 +236,14 @@ export async function toggleFavorite(offerId) {
 
   if (snap.exists()) {
     await deleteDoc(favRef);
-    return false;
+    return false; // removido
   } else {
     await setDoc(favRef, {
       userId: user.uid,
       offerId,
       createdAt: serverTimestamp()
     });
-    return true;
+    return true; // adicionado
   }
 }
 
@@ -241,6 +257,7 @@ export async function getFavorites() {
 
   if (!offerIds.length) return [];
 
+  // Busca as ofertas
   const offers = [];
   for (const oid of offerIds) {
     const o = await getOfferById(oid);
