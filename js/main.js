@@ -171,6 +171,16 @@ function bindGlobalEvents() {
   document.getElementById("profileForm")?.addEventListener("submit", handleProfileSave);
   document.getElementById("btnDeleteAccount")?.addEventListener("click", handleDeleteAccount);
   document.getElementById("chatForm")?.addEventListener("submit", handleChatSubmit);
+
+  document.getElementById("btnLogout")?.addEventListener("click", async () => {
+    try {
+      await logout();
+      closeModal("profileModal");
+      showToast("Você saiu da conta.", "success");
+    } catch (err) {
+      showToast("Erro ao sair.", "error");
+    }
+  });
 }
 
 // ============================================================
@@ -198,12 +208,13 @@ async function handleSignup(e) {
   const name = document.getElementById("signupName").value.trim();
   const email = document.getElementById("signupEmail").value.trim();
   const whatsapp = document.getElementById("signupWhatsapp").value.trim();
+  const address = document.getElementById("signupAddress").value.trim();
   const password = document.getElementById("signupPassword").value;
   const errEl = document.getElementById("signupError");
   errEl.textContent = "";
 
   try {
-    await signUp(name, email, password, whatsapp);
+    await signUp(name, email, password, whatsapp, address);
     closeModal("authModal");
     showToast("Conta criada! Verifique seu e-mail para ativar.", "success");
     e.target.reset();
@@ -221,7 +232,8 @@ function translateAuthError(err) {
     "auth/user-not-found": "Usuário não encontrado.",
     "auth/wrong-password": "Senha incorreta.",
     "auth/invalid-credential": "E-mail ou senha incorretos.",
-    "auth/too-many-requests": "Muitas tentativas. Tente mais tarde."
+    "auth/too-many-requests": "Muitas tentativas. Tente mais tarde.",
+    "auth/unauthorized-continue-uri": "Domínio não autorizado. Adicione o domínio no Firebase Authentication → Settings → Authorized domains."
   };
   return map[code] || err.message || "Erro inesperado.";
 }
@@ -329,11 +341,20 @@ async function openDetailModal(offerId) {
       ? offer.images.map((url) => `<img src="${url}" alt="">`).join("")
       : `<img src="https://via.placeholder.com/600x400?text=Sem+foto" alt="">`;
 
+  let locationText = "";
+  try {
+    const { getDoc, doc, db } = await import("./firebase.js");
+    const userSnap = await getDoc(doc(db, "users", offer.userId));
+    if (userSnap.exists() && userSnap.data().address) {
+      locationText = ` • 📍 ${escapeHtml(userSnap.data().address)}`;
+    }
+  } catch (_) {}
+
   content.innerHTML = `
     <div class="detail-gallery">${images}</div>
     <h2 class="detail-title">${escapeHtml(offer.title)}</h2>
     <p class="detail-desc">${escapeHtml(offer.description)}</p>
-    <p class="detail-meta">Publicado por ${escapeHtml(offer.userName || "Usuário")} • ${formatDate(offer.createdAt)}</p>
+    <p class="detail-meta">Publicado por ${escapeHtml(offer.userName || "Usuário")} • ${formatDate(offer.createdAt)}${locationText}</p>
     <div class="detail-actions">
       <button class="btn btn-whatsapp" data-action="whatsapp" data-id="${offer.id}">📱 WhatsApp</button>
       <button class="btn btn-chat" data-action="chat" data-id="${offer.id}">💬 Chat interno</button>
@@ -564,6 +585,7 @@ async function openProfileModal() {
   document.getElementById("profileName").value = data?.name || user?.displayName || "";
   document.getElementById("profileEmail").value = user?.email || "";
   document.getElementById("profileWhatsapp").value = data?.whatsapp || "";
+  document.getElementById("profileAddress").value = data?.address || "";
 
   switchProfileTab("account");
   openModal("profileModal");
@@ -587,9 +609,10 @@ async function handleProfileSave(e) {
   e.preventDefault();
   const name = document.getElementById("profileName").value.trim();
   const whatsapp = document.getElementById("profileWhatsapp").value.trim();
+  const address = document.getElementById("profileAddress").value.trim();
 
   try {
-    await updateUserProfile(name, whatsapp);
+    await updateUserProfile(name, whatsapp, address);
     showToast("Perfil atualizado!", "success");
   } catch (err) {
     showToast(err.message, "error");
