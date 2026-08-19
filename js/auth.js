@@ -12,6 +12,8 @@ import {
   sendEmailVerification,
   updateProfile,
   deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
   collection,
   doc,
   setDoc,
@@ -24,7 +26,7 @@ import {
   serverTimestamp
 } from "./firebase.js";
 
-import { showToast, openModal, closeModal } from "./ui.js";
+import { showToast } from "./ui.js";
 
 let currentUser = null;
 let currentUserData = null;
@@ -137,23 +139,34 @@ export async function updateUserProfile(name, whatsapp) {
 }
 
 /**
- * Exclusão definitiva da conta em lote
+ * Exclusão definitiva da conta
+ * Pede a senha novamente (reautenticação) antes de apagar
  */
-export async function deleteAccountCompletely() {
+export async function deleteAccountCompletely(password) {
   if (!currentUser) throw new Error("Usuário não autenticado.");
+  if (!password) throw new Error("Informe sua senha para confirmar.");
 
   const uid = currentUser.uid;
-  const batch = writeBatch(db);
 
+  // 1. Reautentica (obrigatório para deleteUser)
+  const credential = EmailAuthProvider.credential(currentUser.email, password);
+  await reauthenticateWithCredential(currentUser, credential);
+
+  // 2. Apaga ofertas do usuário
+  const batch = writeBatch(db);
   const offersSnap = await getDocs(query(collection(db, "offers"), where("userId", "==", uid)));
   offersSnap.forEach((d) => batch.delete(d.ref));
 
+  // 3. Apaga favoritos do usuário
   const favsSnap = await getDocs(query(collection(db, "favorites"), where("userId", "==", uid)));
   favsSnap.forEach((d) => batch.delete(d.ref));
 
+  // 4. Apaga documento do usuário
   batch.delete(doc(db, "users", uid));
 
   await batch.commit();
+
+  // 5. Apaga a conta no Authentication
   await deleteUser(currentUser);
 
   currentUser = null;
