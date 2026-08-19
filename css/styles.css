@@ -833,17 +833,21 @@ button, input, textarea {
   margin-bottom: 16px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: 8px;
 }
 
 .detail-gallery img {
   width: 100%;
-  max-height: 280px;
-  object-fit: cover;
+  max-height: 70vh;          /* ocupa até 70% da altura da tela */
+  height: auto;
+  object-fit: contain;       /* mostra a imagem inteira, sem cortar */
   border-radius: var(--radius-sm);
   scroll-snap-align: start;
   flex-shrink: 0;
+  background: #000;
 }
-
 .detail-title {
   font-size: 1.3rem;
   margin-bottom: 8px;
