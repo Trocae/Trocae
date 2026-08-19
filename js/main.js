@@ -713,7 +713,6 @@ async function loadMyChats() {
       return;
     }
     empty.classList.add("hidden");
-    const uid = getCurrentUser().uid;
 
     list.innerHTML = chats
       .map((c) => {
