@@ -600,14 +600,26 @@ async function handleDeleteAccount() {
   if (!confirm("Tem certeza? Esta ação é irreversível. Todos os seus anúncios serão apagados.")) {
     return;
   }
-  if (!confirm("Confirme novamente: excluir conta definitivamente?")) return;
+
+  const password = prompt("Por segurança, digite sua senha para confirmar a exclusão da conta:");
+  if (!password) {
+    showToast("Exclusão cancelada.", "info");
+    return;
+  }
 
   try {
-    await deleteAccountCompletely();
+    await deleteAccountCompletely(password);
     closeModal("profileModal");
     showToast("Conta excluída com sucesso.", "success");
   } catch (err) {
-    showToast(err.message || "Erro ao excluir conta. Tente fazer login novamente e repetir.", "error");
+    console.error(err);
+    if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+      showToast("Senha incorreta.", "error");
+    } else if (err.code === "auth/requires-recent-login") {
+      showToast("Faça login novamente e tente excluir a conta.", "error");
+    } else {
+      showToast(err.message || "Erro ao excluir conta.", "error");
+    }
   }
 }
 
