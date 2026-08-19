@@ -1,5 +1,7 @@
 /**
- * Trocaê – Configuração Firebase v10+ (sem Storage – plano gratuito)
+ * Trocaê – Configuração e inicialização do Firebase v10+
+ * Versão SEM Storage (plano gratuito Spark)
+ * Substitua as chaves pelos valores reais do projeto trocae-f94e1
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -37,6 +39,9 @@ import {
   limit
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// ============================================================
+// CONFIGURAÇÃO – Substitua pelos valores reais do Firebase Console
+// ============================================================
 const firebaseConfig = {
   apiKey: "SUA_API_KEY_AQUI",
   authDomain: "trocae-f94e1.firebaseapp.com",
@@ -46,16 +51,42 @@ const firebaseConfig = {
   appId: "SEU_APP_ID"
 };
 
+// Inicialização
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 export {
-  app, auth, db,
-  createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
-  onAuthStateChanged, sendEmailVerification, updateProfile, deleteUser, updateEmail,
-  EmailAuthProvider, reauthenticateWithCredential,
-  collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
-  query, where, orderBy, onSnapshot, serverTimestamp, writeBatch,
-  arrayUnion, arrayRemove, limit
+  app,
+  auth,
+  db,
+  // Auth
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  sendEmailVerification,
+  updateProfile,
+  deleteUser,
+  updateEmail,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  // Firestore
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  writeBatch,
+  arrayUnion,
+  arrayRemove,
+  limit
 };
