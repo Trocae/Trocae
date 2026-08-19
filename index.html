@@ -10,19 +10,26 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔄</text></svg>">
 </head>
 <body>
+  <!-- Header -->
   <header class="header">
     <div class="container header-inner">
       <a href="#" class="logo" id="logoLink" aria-label="Trocaê - Página inicial">
         <span class="logo-icon"></span>
         <span class="logo-text">Trocaê</span>
       </a>
+
       <div class="header-actions">
         <button id="themeToggle" class="btn-icon" aria-label="Alternar tema claro/escuro" title="Tema">
           <span class="theme-icon light">☀️</span>
           <span class="theme-icon dark">🌙</span>
         </button>
-        <button id="btnNewOffer" class="btn btn-primary btn-sm hidden" aria-label="Publicar nova oferta">+ Publicar</button>
+
+        <button id="btnNewOffer" class="btn btn-primary btn-sm hidden" aria-label="Publicar nova oferta">
+          + Publicar
+        </button>
+
         <button id="btnAuth" class="btn btn-outline btn-sm">Entrar</button>
+
         <button id="btnProfile" class="btn-icon hidden" aria-label="Meu perfil" title="Perfil">
           <span class="avatar-placeholder">👤</span>
         </button>
@@ -30,16 +37,21 @@
     </div>
   </header>
 
+  <!-- Main Content -->
   <main class="main">
+    <!-- Hero / Banner Carousel -->
     <section class="banner-section" id="bannerSection">
       <div class="carousel" id="bannerCarousel">
-        <div class="carousel-track" id="carouselTrack"></div>
+        <div class="carousel-track" id="carouselTrack">
+          <!-- Slides gerados via JS -->
+        </div>
         <button class="carousel-btn prev" id="carouselPrev" aria-label="Anterior">‹</button>
         <button class="carousel-btn next" id="carouselNext" aria-label="Próximo">›</button>
         <div class="carousel-dots" id="carouselDots"></div>
       </div>
     </section>
 
+    <!-- Search -->
     <section class="search-section container">
       <div class="search-bar">
         <span class="search-icon" aria-hidden="true">🔍</span>
@@ -48,17 +60,23 @@
       </div>
     </section>
 
+    <!-- Feed de Ofertas -->
     <section class="feed-section container">
       <div class="feed-header">
         <h2 class="section-title">Ofertas recentes</h2>
         <span id="offerCount" class="offer-count"></span>
       </div>
-      <div id="offersGrid" class="offers-grid"></div>
+
+      <div id="offersGrid" class="offers-grid">
+        <!-- Cards gerados via JS -->
+      </div>
+
       <div id="emptyState" class="empty-state hidden">
         <div class="empty-icon">🔍</div>
         <h3>Nenhuma oferta encontrada</h3>
         <p>Tente outro termo ou publique a primeira oferta da comunidade!</p>
       </div>
+
       <div id="loadingState" class="loading-state">
         <div class="spinner"></div>
         <p>Carregando ofertas...</p>
@@ -66,6 +84,7 @@
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
     <div class="container">
       <p>© 2026 Trocaê – Economia circular e trocas sustentáveis</p>
@@ -73,16 +92,20 @@
     </div>
   </footer>
 
-  <!-- Modal Auth -->
+  <!-- ========== MODAIS ========== -->
+
+  <!-- Modal Auth (Login / Cadastro) -->
   <div id="authModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <div class="modal-content auth-modal">
       <button class="modal-close" data-close="authModal" aria-label="Fechar">×</button>
       <h2 id="authTitle">Entrar no Trocaê</h2>
+
       <div class="auth-tabs">
         <button class="auth-tab active" data-tab="login">Entrar</button>
         <button class="auth-tab" data-tab="signup">Criar conta</button>
       </div>
 
+      <!-- Login Form -->
       <form id="loginForm" class="auth-form">
         <div class="form-group">
           <label for="loginEmail">E-mail</label>
@@ -96,6 +119,7 @@
         <p class="auth-error" id="loginError"></p>
       </form>
 
+      <!-- Signup Form -->
       <form id="signupForm" class="auth-form hidden">
         <div class="form-group">
           <label for="signupName">Nome de exibição</label>
@@ -125,11 +149,12 @@
     </div>
   </div>
 
-  <!-- Modal Nova Oferta -->
+  <!-- Modal Nova Oferta / Editar -->
   <div id="offerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="offerModalTitle">
     <div class="modal-content offer-modal">
       <button class="modal-close" data-close="offerModal" aria-label="Fechar">×</button>
       <h2 id="offerModalTitle">Publicar oferta</h2>
+
       <form id="offerForm">
         <input type="hidden" id="offerId">
         <div class="form-group">
@@ -158,11 +183,13 @@
     </div>
   </div>
 
-  <!-- Modal Detalhe -->
+  <!-- Modal Detalhe da Oferta -->
   <div id="detailModal" class="modal" role="dialog" aria-modal="true">
     <div class="modal-content detail-modal">
       <button class="modal-close" data-close="detailModal" aria-label="Fechar">×</button>
-      <div id="detailContent"></div>
+      <div id="detailContent">
+        <!-- Preenchido via JS -->
+      </div>
     </div>
   </div>
 
@@ -197,6 +224,7 @@
       </nav>
 
       <div class="profile-panels">
+        <!-- Aba 1: Conta -->
         <div id="tab-account" class="profile-panel active" role="tabpanel">
           <form id="profileForm">
             <div class="form-group">
@@ -224,6 +252,7 @@
           </div>
 
           <hr>
+
           <div class="danger-zone">
             <h3>Zona de perigo</h3>
             <p>Excluir permanentemente sua conta e todos os anúncios.</p>
@@ -231,21 +260,25 @@
           </div>
         </div>
 
+        <!-- Aba 2: Minhas Publicações -->
         <div id="tab-myOffers" class="profile-panel" role="tabpanel">
           <div id="myOffersList" class="profile-list"></div>
           <div id="myOffersEmpty" class="empty-mini hidden">Você ainda não publicou nenhuma oferta.</div>
         </div>
 
+        <!-- Aba 3: Conversas -->
         <div id="tab-chats" class="profile-panel" role="tabpanel">
           <div id="chatsList" class="profile-list"></div>
           <div id="chatsEmpty" class="empty-mini hidden">Nenhuma conversa ainda.</div>
         </div>
 
+        <!-- Aba 4: Favoritos -->
         <div id="tab-favorites" class="profile-panel" role="tabpanel">
           <div id="favoritesList" class="profile-list"></div>
           <div id="favoritesEmpty" class="empty-mini hidden">Nenhum favorito salvo.</div>
         </div>
 
+        <!-- Aba 5: Bloqueados -->
         <div id="tab-blocked" class="profile-panel" role="tabpanel">
           <div id="blockedList" class="profile-list"></div>
           <div id="blockedEmpty" class="empty-mini hidden">Nenhum usuário bloqueado.</div>
@@ -254,7 +287,10 @@
     </div>
   </div>
 
+  <!-- Toast notifications -->
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
   <script type="module" src="js/main.js"></script>
 </body>
 </html>
