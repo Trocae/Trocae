@@ -1,44 +1,21 @@
 /**
- * Trocaê – Módulo de Autenticação e Gestão de Usuários
+ * Trocaê – Autenticação e Gestão de Usuários
  */
 
 import {
-  auth,
-  db,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  sendEmailVerification,
-  updateProfile,
-  deleteUser,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  collection,
-  doc,
-  setDoc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-  deleteDoc,
-  writeBatch,
-  serverTimestamp
+  auth, db,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
+  onAuthStateChanged, sendEmailVerification, updateProfile, deleteUser,
+  EmailAuthProvider, reauthenticateWithCredential,
+  collection, doc, setDoc, getDoc, getDocs, query, where, writeBatch, serverTimestamp
 } from "./firebase.js";
-
-import { showToast } from "./ui.js";
 
 let currentUser = null;
 let currentUserData = null;
 let authListeners = [];
 
-/**
- * Observa mudanças de autenticação e notifica listeners
- */
 export function initAuth(onChange) {
-  if (typeof onChange === "function") {
-    authListeners.push(onChange);
-  }
+  if (typeof onChange === "function") authListeners.push(onChange);
 
   onAuthStateChanged(auth, async (user) => {
     currentUser = user;
@@ -57,26 +34,12 @@ export function initAuth(onChange) {
   });
 }
 
-export function getCurrentUser() {
-  return currentUser;
-}
+export function getCurrentUser() { return currentUser; }
+export function getCurrentUserData() { return currentUserData; }
+export function isLoggedIn() { return !!currentUser; }
+export function isEmailVerified() { return currentUser?.emailVerified === true; }
 
-export function getCurrentUserData() {
-  return currentUserData;
-}
-
-export function isLoggedIn() {
-  return !!currentUser;
-}
-
-export function isEmailVerified() {
-  return currentUser?.emailVerified === true;
-}
-
-/**
- * Cadastro com e-mail, senha, nome e WhatsApp
- */
-export async function signUp(name, email, password, whatsapp) {
+export async function signUp(name, email, password, whatsapp, address) {
   const cleanWhatsapp = whatsapp.replace(/\D/g, "");
   if (cleanWhatsapp.length < 10 || cleanWhatsapp.length > 11) {
     throw new Error("Número de WhatsApp inválido. Use DDD + número (10 ou 11 dígitos).");
@@ -94,6 +57,7 @@ export async function signUp(name, email, password, whatsapp) {
     name,
     email,
     whatsapp: cleanWhatsapp,
+    address: (address || "").trim(),
     createdAt: serverTimestamp(),
     userBlockedList: []
   });
@@ -101,25 +65,16 @@ export async function signUp(name, email, password, whatsapp) {
   return cred.user;
 }
 
-/**
- * Login
- */
 export async function login(email, password) {
   const cred = await signInWithEmailAndPassword(auth, email, password);
   return cred.user;
 }
 
-/**
- * Logout
- */
 export async function logout() {
   await signOut(auth);
 }
 
-/**
- * Atualiza dados do perfil (nome e WhatsApp)
- */
-export async function updateUserProfile(name, whatsapp) {
+export async function updateUserProfile(name, whatsapp, address) {
   if (!currentUser) throw new Error("Usuário não autenticado.");
 
   const cleanWhatsapp = whatsapp.replace(/\D/g, "");
@@ -130,52 +85,42 @@ export async function updateUserProfile(name, whatsapp) {
   await updateProfile(currentUser, { displayName: name });
   await setDoc(
     doc(db, "users", currentUser.uid),
-    { name, whatsapp: cleanWhatsapp },
+    { name, whatsapp: cleanWhatsapp, address: (address || "").trim() },
     { merge: true }
   );
 
-  currentUserData = { ...currentUserData, name, whatsapp: cleanWhatsapp };
+  currentUserData = {
+    ...currentUserData,
+    name,
+    whatsapp: cleanWhatsapp,
+    address: (address || "").trim()
+  };
   return currentUserData;
 }
 
-/**
- * Exclusão definitiva da conta
- * Pede a senha novamente (reautenticação) antes de apagar
- */
 export async function deleteAccountCompletely(password) {
   if (!currentUser) throw new Error("Usuário não autenticado.");
   if (!password) throw new Error("Informe sua senha para confirmar.");
 
   const uid = currentUser.uid;
-
-  // 1. Reautentica (obrigatório para deleteUser)
   const credential = EmailAuthProvider.credential(currentUser.email, password);
   await reauthenticateWithCredential(currentUser, credential);
 
-  // 2. Apaga ofertas do usuário
   const batch = writeBatch(db);
   const offersSnap = await getDocs(query(collection(db, "offers"), where("userId", "==", uid)));
   offersSnap.forEach((d) => batch.delete(d.ref));
 
-  // 3. Apaga favoritos do usuário
   const favsSnap = await getDocs(query(collection(db, "favorites"), where("userId", "==", uid)));
   favsSnap.forEach((d) => batch.delete(d.ref));
 
-  // 4. Apaga documento do usuário
   batch.delete(doc(db, "users", uid));
-
   await batch.commit();
 
-  // 5. Apaga a conta no Authentication
   await deleteUser(currentUser);
-
   currentUser = null;
   currentUserData = null;
 }
 
-/**
- * Bloqueia ou desbloqueia um usuário
- */
 export async function toggleBlockUser(targetUserId) {
   if (!currentUser || !currentUserData) throw new Error("Não autenticado.");
 
@@ -185,12 +130,7 @@ export async function toggleBlockUser(targetUserId) {
     ? list.filter((id) => id !== targetUserId)
     : [...list, targetUserId];
 
-  await setDoc(
-    doc(db, "users", currentUser.uid),
-    { userBlockedList: newList },
-    { merge: true }
-  );
-
+  await setDoc(doc(db, "users", currentUser.uid), { userBlockedList: newList }, { merge: true });
   currentUserData.userBlockedList = newList;
   return !isBlocked;
 }
