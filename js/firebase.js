@@ -1,6 +1,6 @@
 /**
  * Trocaê – Configuração Firebase v10+
- * Versão SEM Storage (plano gratuito)
+ * Versão SEM Storage (plano gratuito Spark)
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -13,7 +13,9 @@ import {
   sendEmailVerification,
   updateProfile,
   deleteUser,
-  updateEmail
+  updateEmail,
+  EmailAuthProvider,
+  reauthenticateWithCredential
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
   getFirestore,
@@ -36,6 +38,9 @@ import {
   limit
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// ============================================================
+// CONFIGURAÇÃO – Substitua pelos valores reais do seu projeto
+// ============================================================
 const firebaseConfig = {
   apiKey: "AIzaSyA-p54xblpgEqdv7eJ-HjN1FvCv12Vz-ZU",
   authDomain: "trocae-f94e1.firebaseapp.com",
@@ -53,6 +58,7 @@ export {
   app,
   auth,
   db,
+  // Auth
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -61,6 +67,9 @@ export {
   updateProfile,
   deleteUser,
   updateEmail,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  // Firestore
   collection,
   doc,
   setDoc,
