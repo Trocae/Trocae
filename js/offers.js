@@ -24,8 +24,8 @@ import {
 import { getCurrentUser, getCurrentUserData } from "./auth.js";
 
 const MAX_IMAGES = 6;
-const MAX_WIDTH = 800;      // largura máxima da imagem
-const JPEG_QUALITY = 0.6;   // qualidade (0.1 a 1.0)
+const MAX_WIDTH = 800;
+const JPEG_QUALITY = 0.6;
 
 let offersCache = [];
 let unsubscribeOffers = null;
@@ -43,7 +43,6 @@ function compressImage(file) {
         let width = img.width;
         let height = img.height;
 
-        // Redimensiona mantendo proporção
         if (width > MAX_WIDTH) {
           height = Math.round((height * MAX_WIDTH) / width);
           width = MAX_WIDTH;
@@ -54,7 +53,6 @@ function compressImage(file) {
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Converte para JPEG comprimido
         const dataUrl = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
         resolve(dataUrl);
       };
@@ -93,13 +91,12 @@ export async function createOffer({ title, description, imageFiles }) {
     throw new Error(`Máximo de ${MAX_IMAGES} imagens.`);
   }
 
-  // Comprime as imagens no navegador
   const images = await compressImages(imageFiles);
 
   const docRef = await addDoc(collection(db, "offers"), {
     title: title.trim(),
     description: description.trim(),
-    images, // array de Base64
+    images,
     userId: user.uid,
     userName: user.displayName || "Usuário",
     createdAt: serverTimestamp()
@@ -122,7 +119,6 @@ export async function updateOffer(offerId, { title, description, imageFiles, exi
 
   let images = existingImages || snap.data().images || [];
 
-  // Se o usuário selecionou novas fotos, comprime e adiciona
   if (imageFiles && imageFiles.length > 0) {
     const newImages = await compressImages(imageFiles);
     images = [...images, ...newImages].slice(0, MAX_IMAGES);
@@ -151,7 +147,7 @@ export async function deleteOffer(offerId) {
 }
 
 /**
- * Escuta ofertas em tempo real + filtros
+ * Escuta ofertas em tempo real e aplica filtros de integridade + bloqueio
  */
 export function subscribeOffers(callback) {
   if (unsubscribeOffers) unsubscribeOffers();
@@ -164,7 +160,6 @@ export function subscribeOffers(callback) {
       const raw = [];
       snapshot.forEach((d) => raw.push({ id: d.id, ...d.data() }));
 
-      // Filtro de integridade: userId ainda existe
       const validUserIds = new Set();
       await Promise.all(
         [...new Set(raw.map((o) => o.userId))].map(async (uid) => {
@@ -177,7 +172,6 @@ export function subscribeOffers(callback) {
 
       let filtered = raw.filter((o) => validUserIds.has(o.userId));
 
-      // Filtro de usuários bloqueados
       const blocked = getCurrentUserData()?.userBlockedList || [];
       if (blocked.length) {
         filtered = filtered.filter((o) => !blocked.includes(o.userId));
@@ -200,7 +194,7 @@ export function getOffersCache() {
 }
 
 /**
- * Filtro de busca local
+ * Filtra localmente por termo de busca (título ou descrição)
  */
 export function filterOffersBySearch(term) {
   if (!term || !term.trim()) return offersCache;
@@ -222,7 +216,8 @@ export async function getOfferById(id) {
 }
 
 /**
- * Ofertas do usuário logado (ordenação no cliente)
+ * Ofertas do usuário logado
+ * (ordenação feita no cliente para evitar índice composto)
  */
 export async function getMyOffers() {
   const user = getCurrentUser();
