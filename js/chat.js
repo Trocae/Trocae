@@ -1,5 +1,9 @@
 /**
  * Trocaê – Sistema de Chat Interno em Tempo Real
+ * Estrutura: coleção "chats" com documentos de conversa
+ * e subcoleção "messages" para as mensagens.
+ *
+ * ID da conversa: sortedIds join (uid1_uid2) + offerId
  */
 
 import {
